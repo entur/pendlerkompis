@@ -1,0 +1,16 @@
+{
+  "name": "pendlerkompis",
+  "version": "0.1.0",
+  "description": "KI-drevet reiseassistent for dagpendlarar",
+  "scripts": {
+    "setup": "python3 -m venv .venv && .venv/bin/pip install -q -r data/requirements.txt -r motor/requirements.txt",
+    "data": "PYTHONPATH=. .venv/bin/python -m data.main",
+    "data:hjem": "PYTHONPATH=. .venv/bin/python -m data.main --direction fra_hjem",
+    "data:jobb": "PYTHONPATH=. .venv/bin/python -m data.main --direction fra_jobb",
+    "motor": "PYTHONPATH=. .venv/bin/python -m motor.main",
+    "motor:hjem": "PYTHONPATH=. .venv/bin/python -m motor.main --direction fra_hjem",
+    "motor:jobb": "PYTHONPATH=. .venv/bin/python -m motor.main --direction fra_jobb",
+    "frontend": "cd presentasjon && npm run dev",
+    "frontend:install": "cd presentasjon && npm install"
+  }
+}
