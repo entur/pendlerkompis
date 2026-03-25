@@ -33,6 +33,7 @@ export default function DisruptionAlert({ data, onSelect }) {
           action={anbefaling.handling}
           description={anbefaling.beskrivelse}
           arrivalTime={formatTime(anbefaling.estimert_ankomst_hjem)}
+          travelLink={anbefaling.travel_link}
           onSelect={() => onSelect(anbefaling.handling, anbefaling.beskrivelse, anbefaling.alternativ_id)}
         />
       </div>
@@ -46,6 +47,7 @@ export default function DisruptionAlert({ data, onSelect }) {
               action={alt.handling}
               description={alt.beskrivelse}
               arrivalTime={formatTime(alt.estimert_ankomst_hjem)}
+              travelLink={alt.travel_link}
               onSelect={() => onSelect(alt.handling, alt.beskrivelse, alt.alternativ_id)}
             />
           ))}

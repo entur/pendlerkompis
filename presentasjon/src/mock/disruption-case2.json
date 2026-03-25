@@ -11,7 +11,8 @@
     "handling": "alternativ_rute",
     "beskrivelse": "Ta tog R21 fra Oslo S til Ski (avgang 16:45), deretter buss 510 til Seiersten. Du er hjemme ca. 18:15.",
     "alternativ_id": "alt-1",
-    "estimert_ankomst_hjem": "2026-03-25T18:15:00+01:00"
+    "estimert_ankomst_hjem": "2026-03-25T18:15:00+01:00",
+    "travel_link": "https://entur.no/travel-result?startId=NSR:StopPlace:59872&stopId=NSR:StopPlace:60944"
   },
   "andre_alternativer": [
     {

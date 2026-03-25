@@ -1,4 +1,4 @@
-export default function Alternative({ action, description, arrivalTime, onSelect }) {
+export default function Alternative({ action, description, arrivalTime, travelLink, onSelect }) {
   return (
     <div
       onClick={onSelect}
@@ -19,6 +19,22 @@ export default function Alternative({ action, description, arrivalTime, onSelect
         <p style={{ margin: '0.25rem 0 0', fontWeight: 'bold', fontSize: '1rem' }}>
           Hjemme ca. {arrivalTime}
         </p>
+      )}
+      {travelLink && (
+        <a
+          href={travelLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            display: 'inline-block',
+            marginTop: '0.5rem',
+            color: 'var(--colors-brand-blue, #181c56)',
+            fontSize: '0.9rem',
+          }}
+        >
+          Se reise i Entur →
+        </a>
       )}
     </div>
   )

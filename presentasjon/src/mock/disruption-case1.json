@@ -11,14 +11,16 @@
     "handling": "reis_tidligere",
     "beskrivelse": "Ta T-banen nå — den går fortsatt. Drar du med en gang rekker du avgangen fra Jernbanetorget. Hjemme på Smestad ca. 16:20.",
     "alternativ_id": "alt-1",
-    "estimert_ankomst_hjem": "2026-03-25T16:20:00+01:00"
+    "estimert_ankomst_hjem": "2026-03-25T16:20:00+01:00",
+    "travel_link": "https://entur.no/travel-result?startId=NSR:StopPlace:58366&stopId=NSR:StopPlace:58273"
   },
   "andre_alternativer": [
     {
       "handling": "alternativ_rute",
       "beskrivelse": "Buss fra Jernbanetorget. Linje 34 eller 24 til Brynseng, bytt til linje 81 eller 28 til Smestad. Hjemme ca. 17:00.",
       "alternativ_id": "alt-2",
-      "estimert_ankomst_hjem": "2026-03-25T17:00:00+01:00"
+      "estimert_ankomst_hjem": "2026-03-25T17:00:00+01:00",
+      "travel_link": "https://entur.no/travel-result?startId=NSR:StopPlace:58366&stopId=NSR:StopPlace:58273"
     },
     {
       "handling": "utsett",
