@@ -15,6 +15,8 @@ Pendlerkompis kjenner reisemønsteret ditt og varsler deg om avvik med konkrete 
 
 ### Persona: Rutinerte Rolf
 
+![Rutinerte Rolf](docs/rutinerte_rolf.png)
+
 Dagpendler Drammen <-> Oslo. Kjenner reisen sin godt, men trenger beslutningsstøtte ved avvik: reise tidligere, utsette, alternativ rute, eller jobbe hjemmefra.
 
 ## Arkitektur
