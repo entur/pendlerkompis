@@ -14,6 +14,36 @@ VAERMELDING_MALAR = {
 }
 
 
+def _finn_tog_avgang(alt: dict) -> str:
+    """Finn togets avgangstid fraa steg-data (ikkje trip-start med gangdel).
+
+    Journey Planner returnerer expectedStartTime for heile trippen,
+    som inkluderer gange til stasjonen. Vi treng togets faktiske
+    avgangstid for aa vise korrekt klokkeslett til brukaren.
+    """
+    avgang_iso = alt.get("avgang", "")
+    if not avgang_iso or "T" not in avgang_iso:
+        return ""
+
+    from datetime import datetime, timedelta
+
+    try:
+        trip_start = datetime.fromisoformat(avgang_iso)
+    except (ValueError, TypeError):
+        return ""
+
+    # Summar gangminutta foer foerste transportleg
+    gange_min = 0
+    for steg in alt.get("steg", []):
+        if steg.get("type") == "gange":
+            gange_min += steg.get("varighet_min", 0)
+        else:
+            break
+
+    tog_avgang = trip_start + timedelta(minutes=gange_min)
+    return tog_avgang.strftime("%H:%M")
+
+
 async def generer_tekst(
     kontrakt_a: dict,
     type_: str,
@@ -47,9 +77,8 @@ def _generer_vaermelding(
                 if steg.get("linje"):
                     linje = steg["linje"]
                     break
-            avgang = alt.get("avgang", "")
-            if avgang and "T" in avgang:
-                tid = avgang.split("T")[1][:5]
+            # Finn togets avgangstid (ikkje trip-start som inkluderer gange)
+            tid = _finn_tog_avgang(alt)
             break
 
     # Finn p90 for malen
@@ -103,10 +132,28 @@ async def _generer_avvikstekst(
         for p in laert
     )
 
-    andre_tekst = "\n".join(
-        f"- {a.get('beskrivelse', '')} (ankomst: {a.get('estimert_ankomst_hjem', '?')})"
-        for a in andre
-    )
+    # Finn togets faktiske avgangstid for anbefalinga (ikkje trip-start)
+    anbefaling_alt_id = anbefaling.get("alternativ_id")
+    tog_avgang_tekst = ""
+    for alt in kontrakt_a.get("reisealternativer", []):
+        if alt.get("id") == anbefaling_alt_id:
+            tog_avgang_tekst = _finn_tog_avgang(alt)
+            break
+
+    andre_med_togavgang = []
+    for a in andre:
+        a_alt_id = a.get("alternativ_id")
+        a_tog_tid = ""
+        for alt in kontrakt_a.get("reisealternativer", []):
+            if alt.get("id") == a_alt_id:
+                a_tog_tid = _finn_tog_avgang(alt)
+                break
+        ankomst = a.get("estimert_ankomst_hjem", "?")
+        andre_med_togavgang.append(
+            f"- {a.get('beskrivelse', '')} (tog kl {a_tog_tid or '?'}, heime ca. {ankomst[-14:-9] if isinstance(ankomst, str) and len(ankomst) > 14 else ankomst})"
+        )
+
+    andre_tekst = "\n".join(andre_med_togavgang)
 
     prompt = f"""Du er ein reiseassistent for ein dagpendlar mellom Drammen og Oslo.
 Skriv kort og tydeleg paa norsk. Bruk aa/oe/ae i staden for æøå.
@@ -124,7 +171,7 @@ ROLFS PREFERANSAR:
 {laert_tekst or 'Ingen laerte preferansar enno.'}
 
 ANBEFALT ALTERNATIV:
-- {anbefaling.get('beskrivelse', '')} (ankomst: {anbefaling.get('estimert_ankomst_hjem', '?')})
+- {anbefaling.get('beskrivelse', '')} (tog kl {tog_avgang_tekst or '?'}, heime ca. {str(anbefaling.get('estimert_ankomst_hjem', '?'))[-14:-9] if anbefaling.get('estimert_ankomst_hjem') else '?'})
 
 ANDRE ALTERNATIV:
 {andre_tekst or 'Ingen.'}
