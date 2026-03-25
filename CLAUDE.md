@@ -22,13 +22,41 @@ Tre spor i en pipeline. Spor 1 er et spesifikasjonsspor — all kode lever i Spo
 ## Mappestruktur
 
 ```
-/data            # Spor 1: Spesifikasjon, API-dokumentasjon, dataformat
-/motor           # Spor 2: All backend-kode (datahenting + analyse + KI)
-/presentasjon    # Spor 3: Frontend/UI
-/shared          # Kontrakter (A + B) og mock-data
+/docs              # Tverrfaglig ledelse — kontekst og spesifikasjoner
+  /produkt         #   Produktleder — persona, verdiforslag, viability
+  /design          #   Designer — brukerreiser, brukerinnsikt, interaksjonsmonster
+  /team            #   Teamlead — way of work, prosess, seremonier
+/data              # Spor 1 (teknologi) — API-dokumentasjon, dataformat-spesifikasjon
+/motor             # Spor 2 (teknologi) — all backend-kode
+/presentasjon      # Spor 3 (teknologi) — frontend/UI-kode
+/shared            # Kontrakter (A + B) og mock-data
 ```
 
-Hver mappe har sin egen CLAUDE.md med sporspesifikk kontekst.
+Hver mappe har sin egen CLAUDE.md med kontekst for den som jobber der.
+
+## Tverrfaglig ledelse — fire dimensjoner
+
+Enturs modell med fire ledelsesdimensjoner reflekteres i /docs:
+
+| Dimensjon | Ansvar | Mappe | Skriver |
+|-----------|--------|-------|---------|
+| **Produkt** | Persona, verdiforslag, viability, leveranseansvar | /docs/produkt | Produktleder |
+| **Design** | Brukerreiser, brukerinnsikt, interaksjonsmonster, DesignOps | /docs/design | Designer |
+| **Team** | Way of work, prosess, seremonier, metoder | /docs/team | Teamlead |
+| **Teknologi** | Arkitektur, teknologivalg, feasibility | /data, /motor, /presentasjon, /shared | Utviklere |
+
+## Fileierskap — hvordan unngaa konflikter
+
+Konflikter unngaas ved at hver dimensjon eier sine mapper. Alle kan *lese* alt, men kun eier *skriver*.
+
+- Produktleder skriver i /docs/produkt — utviklere og designer *leser* for kontekst
+- Designer skriver i /docs/design — Spor 3 (presentasjon) *leser* for UI-retning
+- Teamlead skriver i /docs/team — alle *leser* for prosess og arbeidsflyt
+- Utviklere skriver i /data, /motor, /presentasjon — eid av sine respektive spor
+- /shared (kontrakter) endres kun etter tverrfaglig avtale
+- CLAUDE.md (rot) eies av teamlead — den felles konteksten for alle Claude Code-sesjoner
+
+**Regel:** Hvis du trenger aa endre en fil du ikke eier, avtal med eier foerst.
 
 ## Persona: Erfarne Rolf
 
