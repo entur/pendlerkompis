@@ -108,6 +108,55 @@
           "status": { "type": "string", "enum": ["i_rute", "forsinket", "innstilt", "ukjent"] }
         }
       }
+    },
+    "sanntidsdata": {
+      "type": "object",
+      "description": "Utvidet sanntidsdata for motoren. Additiv — kan ignoreres av konsumenter som ikke trenger det.",
+      "properties": {
+        "faktiske_ankomster": {
+          "type": "array",
+          "description": "Faktiske/estimerte ankomster fra de siste 2 timene for samme linjer og destinasjon.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "service_journey_id": { "type": "string" },
+              "linje": { "type": "string" },
+              "planlagt_ankomst": { "type": "string", "format": "date-time" },
+              "faktisk_ankomst": { "type": ["string", "null"], "format": "date-time", "description": "null hvis innstilt" },
+              "forsinkelse_min": { "type": ["number", "null"], "description": "Minutter forsinket (negativ = tidlig). null hvis innstilt." },
+              "innstilt": { "type": "boolean" }
+            }
+          }
+        },
+        "forsinkelsesstatistikk": {
+          "type": "array",
+          "description": "Empiriske forsinkelser (median og 90-persentil) gruppert per linje og time.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "linje": { "type": "string" },
+              "stasjon": { "type": "string" },
+              "time_paa_doegnet": { "type": "integer", "minimum": 0, "maximum": 23 },
+              "median_forsinkelse_min": { "type": "number" },
+              "p90_forsinkelse_min": { "type": "number" },
+              "antall_observasjoner": { "type": "integer" }
+            }
+          }
+        },
+        "innstillinger": {
+          "type": "array",
+          "description": "Kanselleringer fra reisealternativer og destinasjonens avgangstavle.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "service_journey_id": { "type": "string" },
+              "linje": { "type": "string" },
+              "type": { "type": "string", "enum": ["hel_tur", "delvis"], "description": "hel_tur = hele avgangen innstilt, delvis = enkelt stopp innstilt" },
+              "paavirket_stasjon": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
     }
   }
 }

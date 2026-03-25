@@ -71,5 +71,59 @@
       ],
       "status": "forsinket"
     }
-  ]
+  ],
+  "sanntidsdata": {
+    "faktiske_ankomster": [
+      {
+        "service_journey_id": "VYG:ServiceJourney:821_444401-R",
+        "linje": "RE11",
+        "planlagt_ankomst": "2026-03-25T15:12:00+01:00",
+        "faktisk_ankomst": "2026-03-25T15:15:00+01:00",
+        "forsinkelse_min": 3.0,
+        "innstilt": false
+      },
+      {
+        "service_journey_id": "VYG:ServiceJourney:822_444402-R",
+        "linje": "RE11",
+        "planlagt_ankomst": "2026-03-25T15:42:00+01:00",
+        "faktisk_ankomst": null,
+        "forsinkelse_min": null,
+        "innstilt": true
+      },
+      {
+        "service_journey_id": "VYG:ServiceJourney:L1_3321-R",
+        "linje": "L1",
+        "planlagt_ankomst": "2026-03-25T14:55:00+01:00",
+        "faktisk_ankomst": "2026-03-25T15:03:00+01:00",
+        "forsinkelse_min": 8.0,
+        "innstilt": false
+      }
+    ],
+    "forsinkelsesstatistikk": [
+      {
+        "linje": "RE11",
+        "stasjon": "Drammen",
+        "time_paa_doegnet": 15,
+        "median_forsinkelse_min": 3.0,
+        "p90_forsinkelse_min": 3.0,
+        "antall_observasjoner": 1
+      },
+      {
+        "linje": "L1",
+        "stasjon": "Drammen",
+        "time_paa_doegnet": 14,
+        "median_forsinkelse_min": 8.0,
+        "p90_forsinkelse_min": 8.0,
+        "antall_observasjoner": 1
+      }
+    ],
+    "innstillinger": [
+      {
+        "service_journey_id": "VYG:ServiceJourney:822_444402-R",
+        "linje": "RE11",
+        "type": "hel_tur",
+        "paavirket_stasjon": null
+      }
+    ]
+  }
 }
