@@ -179,13 +179,23 @@ def _bygg_avvik(scenario: dict, naa: datetime) -> dict:
 
 
 def _paavirk_alternativer(alternativer: list[dict], avvik: dict, effekt: str) -> list[dict]:
-    """Juster status og tider paa reisealternativ basert paa avvikseffekt."""
+    """Juster status, avgangs-/ankomsttider og steg basert paa avvikseffekt.
+
+    I røynda oppdaterer Entur Journey Planner expectedStartTime/expectedEndTime
+    basert paa SIRI ET-data. Vi simulerer same oppfoeorsel:
+    - Forseinka avgangar (avgang) naar toget ikkje kan koeyre i tide
+    - Forseinka ankomst (estimert_ankomst) pga. lenger reisetid
+    - Justerte steg-varigheiter for paavirka toglinjer
+    - Innstilte ruter faar estimert_ankomst = null
+    """
     paavirka_linjer = set(avvik.get("paavirker_linjer", []))
+    paavirka_stasjoner = set(avvik.get("paavirker_stasjoner", []))
     oppdatert = []
 
     for alt in alternativer:
         alt = dict(alt)  # shallow copy
-        alt_linjer = {s.get("linje", "") for s in alt.get("steg", [])}
+        steg_liste = [dict(s) for s in alt.get("steg", [])]
+        alt_linjer = {s.get("linje", "") for s in steg_liste}
 
         if not alt_linjer & paavirka_linjer:
             oppdatert.append(alt)
@@ -193,44 +203,118 @@ def _paavirk_alternativer(alternativer: list[dict], avvik: dict, effekt: str) ->
 
         if effekt == "innstilt":
             alt["status"] = "innstilt"
+            alt["estimert_ankomst"] = None
+            alt["steg"] = steg_liste
+
         elif effekt == "forsinket":
             alt["status"] = "forsinket"
-            # Legg til forsinkelse paa estimert ankomst
-            forsinkelse_min = random.randint(8, 35)
-            try:
-                ankomst = datetime.fromisoformat(alt["estimert_ankomst"])
-                alt["estimert_ankomst"] = (ankomst + timedelta(minutes=forsinkelse_min)).isoformat()
-            except (ValueError, KeyError):
-                pass
+            forsinkelse = _berekn_forsinkelse(steg_liste, paavirka_linjer, paavirka_stasjoner, (8, 35))
+            alt = _juster_tider(alt, steg_liste, forsinkelse)
+
         elif effekt == "delvis_innstilt":
-            # ~40 % innstilt, resten forsinket
             if random.random() < 0.4:
                 alt["status"] = "innstilt"
+                alt["estimert_ankomst"] = None
+                alt["steg"] = steg_liste
             else:
                 alt["status"] = "forsinket"
-                forsinkelse_min = random.randint(5, 20)
-                try:
-                    ankomst = datetime.fromisoformat(alt["estimert_ankomst"])
-                    alt["estimert_ankomst"] = (ankomst + timedelta(minutes=forsinkelse_min)).isoformat()
-                except (ValueError, KeyError):
-                    pass
+                forsinkelse = _berekn_forsinkelse(steg_liste, paavirka_linjer, paavirka_stasjoner, (5, 20))
+                alt = _juster_tider(alt, steg_liste, forsinkelse)
+
         elif effekt == "blanda":
-            # Vaer-scenario: nokre innstilte, nokre sterkt forseinka
-            r = random.random()
-            if r < 0.3:
+            if random.random() < 0.3:
                 alt["status"] = "innstilt"
+                alt["estimert_ankomst"] = None
+                alt["steg"] = steg_liste
             else:
                 alt["status"] = "forsinket"
-                forsinkelse_min = random.randint(15, 60)
-                try:
-                    ankomst = datetime.fromisoformat(alt["estimert_ankomst"])
-                    alt["estimert_ankomst"] = (ankomst + timedelta(minutes=forsinkelse_min)).isoformat()
-                except (ValueError, KeyError):
-                    pass
+                forsinkelse = _berekn_forsinkelse(steg_liste, paavirka_linjer, paavirka_stasjoner, (15, 60))
+                alt = _juster_tider(alt, steg_liste, forsinkelse)
 
         oppdatert.append(alt)
 
     return oppdatert
+
+
+def _berekn_forsinkelse(
+    steg_liste: list[dict],
+    paavirka_linjer: set[str],
+    paavirka_stasjoner: set[str],
+    delay_range: tuple[int, int],
+) -> dict:
+    """Berekn forsinkelse per steg basert paa kva linjer/stasjoner som er paavirka.
+
+    Returnerer dict med:
+      avgang_forsinkelse_min  – forseinking foer toget i det heile kan koeyre
+      steg_forsinkelse        – liste med ekstra minutt per steg
+      total_ekstra_min        – sum av all forseinking
+    """
+    base_delay = random.randint(*delay_range)
+
+    # Avgangsforseinking: viss avviket er paa ein stasjon tidleg i ruta,
+    # kan toget ikkje starte i tide
+    avgang_forsinkelse = 0
+    steg_forsinkelse = []
+
+    for steg in steg_liste:
+        linje = steg.get("linje", "")
+        fra = steg.get("fra", "")
+        til = steg.get("til", "")
+
+        if linje in paavirka_linjer:
+            # Sjekk om avviket er paa ein stasjon dette steget passerer
+            stasjon_treff = fra in paavirka_stasjoner or til in paavirka_stasjoner
+
+            if stasjon_treff:
+                # Hovuddelen av forseinkinga legg seg paa dette steget
+                ekstra = base_delay
+            else:
+                # Paavirka linje men ikkje direkte stasjon — fylgjeforseinking
+                ekstra = random.randint(3, max(4, base_delay // 3))
+
+            # Viss dette er foerste togsteg, kan avgangen verta forseinka
+            if steg.get("type") == "tog" and avgang_forsinkelse == 0 and ekstra > 5:
+                avgang_forsinkelse = random.randint(2, max(3, ekstra // 2))
+
+            steg_forsinkelse.append(ekstra)
+        else:
+            steg_forsinkelse.append(0)
+
+    total = avgang_forsinkelse + sum(steg_forsinkelse)
+    return {
+        "avgang_forsinkelse_min": avgang_forsinkelse,
+        "steg_forsinkelse": steg_forsinkelse,
+        "total_ekstra_min": total,
+    }
+
+
+def _juster_tider(alt: dict, steg_liste: list[dict], forsinkelse: dict) -> dict:
+    """Juster avgang, ankomst og steg-varigheiter for eit forseinka alternativ."""
+    avgang_delay = forsinkelse["avgang_forsinkelse_min"]
+    steg_delays = forsinkelse["steg_forsinkelse"]
+    total_delay = forsinkelse["total_ekstra_min"]
+
+    # Juster avgang (expectedStartTime i Entur-verda)
+    try:
+        avgang = datetime.fromisoformat(alt["avgang"])
+        alt["avgang"] = (avgang + timedelta(minutes=avgang_delay)).isoformat()
+    except (ValueError, KeyError):
+        pass
+
+    # Juster estimert ankomst
+    try:
+        ankomst = datetime.fromisoformat(alt["estimert_ankomst"])
+        alt["estimert_ankomst"] = (ankomst + timedelta(minutes=total_delay)).isoformat()
+    except (ValueError, KeyError):
+        pass
+
+    # Juster varigheit paa kvart paavirka steg
+    for i, steg in enumerate(steg_liste):
+        if i < len(steg_delays) and steg_delays[i] > 0:
+            steg["varighet_min"] = steg.get("varighet_min", 0) + steg_delays[i]
+    alt["steg"] = steg_liste
+
+    return alt
 
 
 def _paavirk_sanntidsdata(sanntidsdata: dict, avvik: dict, effekt: str) -> dict:
