@@ -19,10 +19,10 @@ export default function NotificationPrompt({ onSimulateDisruption }) {
       situasjon.oppsummering
     )
 
-    // Show the disruption alert in the app after a short delay
+    // Show the disruption alert in the app after a delay so the notification is visible
     setTimeout(() => {
       onSimulateDisruption?.()
-    }, 1000)
+    }, 3000)
   }
 
   if (!isSupported) {

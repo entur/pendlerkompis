@@ -4,6 +4,8 @@ import DisruptionAlert from './components/DisruptionAlert.jsx'
 import NotificationPrompt from './components/NotificationPrompt.jsx'
 import disruptionData from './mock/disruption.json'
 
+const isDemoMode = new URLSearchParams(window.location.search).has('demo')
+
 export default function App() {
   const [selectedAction, setSelectedAction] = useState(null)
   const [showDisruption, setShowDisruption] = useState(false)
@@ -54,7 +56,9 @@ function HomeScreen({ onSimulateDisruption }) {
         <Paragraph>Ingen avvik på reisen din akkurat nå.</Paragraph>
       </div>
 
-      <NotificationPrompt onSimulateDisruption={onSimulateDisruption} />
+      {isDemoMode && (
+        <NotificationPrompt onSimulateDisruption={onSimulateDisruption} />
+      )}
     </div>
   )
 }
