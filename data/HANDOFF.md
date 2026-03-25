@@ -62,6 +62,54 @@ Skriver JSON til stdout.
 4. **Hva skjedde de siste 2 timene?** Se `sanntidsdata.faktiske_ankomster` — nylige forsinkelser predikerer kommende forsinkelser
 5. **Avviksmeldinger for kontekst:** Se `avvik[]` for aa forstaa *hvorfor* ting er forsinket (signalfeil, sporveksel, etc.)
 
+### Evaluering av reisealternativer ved innstilling eller kraftig forsinkelse
+
+Naar ett eller flere alternativer er innstilt eller kraftig forsinket, maa motoren gi en tydelig anbefaling. Slik brukes dataene til aa evaluere og rangere:
+
+**Steg 1 — Identifiser trusselen:**
+- Sjekk `reisealternativer[].status`: `"innstilt"` = bekreftet kansellert, `"forsinket"` = forsinket (sjekk omfang)
+- Kryssreferér med `avvik[]`: avvik med `alvorlighet: "hoy"` som `paavirker_linjer` overlapper med alternativets linjer betyr hoey risiko
+- Sjekk `sanntidsdata.innstillinger[]`: dersom alternativets `steg[].linje` finnes her med `type: "hel_tur"`, er hele avgangen borte
+
+**Steg 2 — Vurder gjenvaerende alternativer:**
+- Filtrer bort alternativer med `status: "innstilt"`
+- For alternativer med `status: "forsinket"`, estimer faktisk forsinkelse:
+  - Se `sanntidsdata.forsinkelsesstatistikk[]` for linjen — `p90_forsinkelse_min` gir worst-case
+  - Se `sanntidsdata.faktiske_ankomster[]` for nylige avganger paa samme linje — dersom de siste 2-3 avgangene var 15+ min forsinket, forvent det samme
+- Ranger gjenvaerende alternativer etter `estimert_ankomst` + eventuell forventet forsinkelse
+
+**Steg 3 — Evaluer bil som alternativ:**
+- Dersom alle kollektivalternativer er innstilt eller har p90 forsinkelse >20 min:
+  - Sammenlign `bildata.estimert_reisetid_min` med beste gjenvaerende kollektivalternativ
+  - Sjekk `bildata.trafikk_punkter[].kapasitetsutnyttelse` — verdier >1.3 betyr koe, bil er kanskje ikke bedre
+  - Dersom bil er raskere OG E18 ikke er overfylt, anbefal bil som alternativ
+
+**Steg 4 — Hensyn til vaer:**
+- Dersom `vaerdata.nedbor_neste_time_mm` >2.0 eller `vaerdata.vindstyrke_ms` >10: kjoereforhold kan vaere daarlige — vekt dette i bil-anbefalingen
+- Kraftig nedbor oeker ogsaa risiko for ytterligere togforsinkelser
+
+**Steg 5 — Bygg anbefalingen:**
+- Velg det beste alternativet basert paa steg 2-4
+- Sett `anbefaling.handling` til riktig verdi:
+  - `"reis_tidligere"` — dersom et tidligere alternativ fortsatt gaar i rute
+  - `"alternativ_rute"` — dersom en annen linje/buss fungerer
+  - `"utsett"` — dersom avviket er midlertidig og `avvik[].estimert_varighet_min` tilsier at normalt alternativ snart fungerer igjen
+  - `"ikke_reis"` — dersom alle alternativer er innstilt og bil ogsaa er upraktisk
+- Fyll alltid `andre_alternativer[]` med de oevrige mulighetene, inkludert bil og «vent»
+
+**Eksempel — signalfeil med innstilt tog:**
+```
+reisealternativer[0].status = "i_rute"       → Tidlig tog kl 15:02, fortsatt ok
+reisealternativer[1].status = "innstilt"      → Buss 31-rute, kansellert
+reisealternativer[2].status = "forsinket"     → Vanlig tog kl 16:42, p90 forsinkelse 25 min
+
+avvik[0].alvorlighet = "hoy", paavirker_linjer = ["L1", "RE11"]
+bildata.estimert_reisetid_min = 44, trafikk ok (kapasitetsutnyttelse ~1.1)
+
+→ Anbefaling: "reis_tidligere" (alt-0, kl 15:02)
+→ Andre: bil (44 min), forsinket tog (ankomst ~18:05), vent (avvik løst om ~1t)
+```
+
 ### Vær
 9. **Bør Rolf kle seg annerledes?** Se `vaerdata.lufttemperatur_c` og `vaerdata.nedbor_neste_time_mm`. Nedbør >0.5 mm/t eller temperatur <0 °C kan være verdt å nevne.
 10. **Symbolkode for UI:** `vaerdata.symbolkode` kan brukes direkte mot Yr-ikoner. Se https://api.met.no/weatherapi/weathericon/2.0/documentation for mapping.

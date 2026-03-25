@@ -138,5 +138,13 @@
     ],
     "estimert_reisetid_min": 44,
     "kilde": "osrm+vegvesen_trafikkdata"
+  },
+  "vaerdata": {
+    "tidspunkt": "2026-03-25T15:00:00Z",
+    "lufttemperatur_c": 4.2,
+    "vindstyrke_ms": 3.8,
+    "nedbor_neste_time_mm": 0.3,
+    "symbolkode": "cloudy",
+    "kilde": "met.no/locationforecast/2.0"
   }
 }
