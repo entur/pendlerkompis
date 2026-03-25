@@ -132,34 +132,64 @@ async def _generer_avvikstekst(
         for p in laert
     )
 
-    # Finn togets faktiske avgangstid for anbefalinga (ikkje trip-start)
+    # Bygg alternativ-info med status, togavgang og ankomsttid
     anbefaling_alt_id = anbefaling.get("alternativ_id")
     tog_avgang_tekst = ""
+    anbefaling_status = ""
     for alt in kontrakt_a.get("reisealternativer", []):
         if alt.get("id") == anbefaling_alt_id:
             tog_avgang_tekst = _finn_tog_avgang(alt)
+            anbefaling_status = alt.get("status", "ukjent")
             break
 
     andre_med_togavgang = []
     for a in andre:
         a_alt_id = a.get("alternativ_id")
         a_tog_tid = ""
+        a_status = ""
         for alt in kontrakt_a.get("reisealternativer", []):
             if alt.get("id") == a_alt_id:
                 a_tog_tid = _finn_tog_avgang(alt)
+                a_status = alt.get("status", "ukjent")
                 break
         ankomst = a.get("estimert_ankomst_hjem", "?")
+        ankomst_kort = ankomst[-14:-9] if isinstance(ankomst, str) and len(ankomst) > 14 else (ankomst or "ukjent")
+        status_tekst = f", STATUS: {a_status}" if a_status else ""
         andre_med_togavgang.append(
-            f"- {a.get('beskrivelse', '')} (tog kl {a_tog_tid or '?'}, heime ca. {ankomst[-14:-9] if isinstance(ankomst, str) and len(ankomst) > 14 else ankomst})"
+            f"- {a.get('beskrivelse', '')} (tog kl {a_tog_tid or '?'}, heime ca. {ankomst_kort}{status_tekst})"
         )
 
     andre_tekst = "\n".join(andre_med_togavgang)
+
+    # Samle status for alle alternativ slik at Claude forstaar heilbiletet
+    alle_statuser = []
+    for alt in kontrakt_a.get("reisealternativer", []):
+        linje = ""
+        for s in alt.get("steg", []):
+            if s.get("linje"):
+                linje = s["linje"]
+                break
+        alle_statuser.append(f"- {linje or 'ukjent'} (alt {alt.get('id')}): {alt.get('status', 'ukjent')}")
+    status_oversikt = "\n".join(alle_statuser)
+
+    # Innstillingar
+    innstillingar = kontrakt_a.get("sanntidsdata", {}).get("innstillinger", [])
+    innst_tekst = "\n".join(
+        f"- {i.get('linje', '?')}: {i.get('type', 'ukjent')}"
+        for i in innstillingar
+    ) if innstillingar else "Ingen innstillingar."
 
     prompt = f"""Du er ein reiseassistent for ein dagpendlar mellom Drammen og Oslo.
 Skriv kort og tydeleg paa norsk. Bruk aa/oe/ae i staden for æøå.
 
 AVVIK:
 {avvik_tekst or 'Ingen spesifikke avviksmeldingar, men forsinkingar/innstillingar er oppdaga.'}
+
+STATUS PAA ALLE TOGALTERNATIV:
+{status_oversikt}
+
+INNSTILLINGAR:
+{innst_tekst}
 
 FORSINKELSESSTATISTIKK (siste 2 timar):
 {stats_tekst or 'Ingen data.'}
@@ -171,10 +201,16 @@ ROLFS PREFERANSAR:
 {laert_tekst or 'Ingen laerte preferansar enno.'}
 
 ANBEFALT ALTERNATIV:
-- {anbefaling.get('beskrivelse', '')} (tog kl {tog_avgang_tekst or '?'}, heime ca. {str(anbefaling.get('estimert_ankomst_hjem', '?'))[-14:-9] if anbefaling.get('estimert_ankomst_hjem') else '?'})
+- {anbefaling.get('beskrivelse', '')} (tog kl {tog_avgang_tekst or '?'}, heime ca. {str(anbefaling.get('estimert_ankomst_hjem', '?'))[-14:-9] if anbefaling.get('estimert_ankomst_hjem') else '?'}, STATUS: {anbefaling_status or 'ukjent'})
 
 ANDRE ALTERNATIV:
 {andre_tekst or 'Ingen.'}
+
+VIKTIG:
+- Viss eit tog er FORSINKET eller INNSTILT, maa teksten reflektere dette.
+- Ikkje sei at toga "gaar som planlagt" viss status er forsinket/innstilt.
+- Viss anbefalinga er forseinka, sei kor mykje forseinka og ny estimert ankomsttid.
+- Viss toget er innstilt, sei det tydeleg og foreslaa alternativ.
 
 Skriv to ting, skilt med |||:
 1. Ein oppsummering av situasjonen (1-2 setningar, maks 50 ord)
