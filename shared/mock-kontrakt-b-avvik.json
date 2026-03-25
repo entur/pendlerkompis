@@ -1,34 +1,34 @@
 {
   "bruker_id": "rolf-1",
   "type": "avvik",
-  "tidspunkt": "2026-03-25T14:45:00+01:00",
+  "tidspunkt": "2026-03-25T15:10:00+01:00",
   "situasjon": {
-    "oppsummering": "Signalfeil ved Asker paavirker hjemreisen din. Toget kl 16:42 er trolig innstilt eller forsinket 20-40 min.",
-    "alvorlighet": "hoy",
-    "avvik_ids": ["sx-12345"]
+    "oppsummering": "Mosseveien (E18) er stengt på grunn av trafikkuhell. Buss 500 til Drøbak går ikke. Stengt siden kl 14:45, ukjent varighet.",
+    "alvorlighet": "høy",
+    "avvik_ids": ["sx-e18-001"]
   },
   "anbefaling": {
-    "handling": "reis_tidligere",
-    "beskrivelse": "Gaa fra jobb naa. Ta 15:02-toget fra Oslo S. Du er hjemme ca. 16:15.",
+    "handling": "alternativ_rute",
+    "beskrivelse": "Ta tog R21 fra Oslo S til Ski (avgang 16:45), deretter buss 510 til Seiersten. Du er hjemme ca. 18:15.",
     "alternativ_id": "alt-1",
-    "estimert_ankomst_hjem": "2026-03-25T16:15:00+01:00"
+    "estimert_ankomst_hjem": "2026-03-25T18:15:00+01:00"
   },
   "andre_alternativer": [
     {
-      "handling": "alternativ_rute",
-      "beskrivelse": "Buss 31 til Lysaker, tog videre til Drammen. Hjemme ca. 18:00.",
-      "alternativ_id": "alt-2",
-      "estimert_ankomst_hjem": "2026-03-25T18:00:00+01:00"
+      "handling": "utsett",
+      "beskrivelse": "Vent til E18 åpner igjen. Tidspunkt er usikkert — det kan ta alt fra 30 minutter til flere timer.",
+      "alternativ_id": null,
+      "estimert_ankomst_hjem": null
     },
     {
-      "handling": "utsett",
-      "beskrivelse": "Feilen forventes loest innen kl 16. Reis som normalt, men forvent forsinkelse. Hjemme ca. 17:50.",
+      "handling": "alternativ_rute",
+      "beskrivelse": "Taxi via E6. Trafikkdata viser mye kø, estimert reisetid ca. 1 time 45 minutter. Hjemme ca. 18:30.",
       "alternativ_id": "alt-3",
-      "estimert_ankomst_hjem": "2026-03-25T17:50:00+01:00"
+      "estimert_ankomst_hjem": "2026-03-25T18:30:00+01:00"
     },
     {
       "handling": "ikke_reis",
-      "beskrivelse": "Situasjonen er usikker. Vurder hjemmekontor resten av dagen.",
+      "beskrivelse": "Bli igjen i Bjørvika. Situasjonen er uavklart og det kan bli en lang kveld på veien.",
       "alternativ_id": null,
       "estimert_ankomst_hjem": null
     }
