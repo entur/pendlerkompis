@@ -37,10 +37,12 @@ async def query_trips(
     to_coords: tuple[float, float],
     date_time: str,
     num_patterns: int = 5,
+    from_place: str | None = None,
+    to_place: str | None = None,
     client: httpx.AsyncClient | None = None,
 ) -> dict:
     """Query Journey Planner for trip alternatives."""
-    variables = trip_variables(from_coords, to_coords, date_time, num_patterns)
+    variables = trip_variables(from_coords, to_coords, date_time, num_patterns, from_place, to_place)
     if client is None:
         async with httpx.AsyncClient() as c:
             return await _post(c, TRIP_QUERY, variables)

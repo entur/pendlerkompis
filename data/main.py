@@ -66,6 +66,8 @@ async def hent_pendlerdata(
             params["to_coords"],
             params["date_time"],
             num_patterns=5,
+            from_place=params.get("from_place"),
+            to_place=params.get("to_place"),
             client=client,
         )
 
