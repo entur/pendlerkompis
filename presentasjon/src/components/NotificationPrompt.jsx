@@ -48,7 +48,7 @@ export default function NotificationPrompt({ onSimulateDisruption }) {
             onClick={() => handleSimulate(
               'case1',
               'Avvik på hjemreisen din',
-              'Signalfeil på Majorstuen. T-bane linje 2 kjører ikke som planlagt.'
+              'Signalfeil på Brynseng. T-bane linje 2 kjører ikke som planlagt.'
             )}
             disabled={!!simulated}
             style={{ width: '100%' }}
