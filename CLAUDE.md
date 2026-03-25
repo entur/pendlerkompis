@@ -140,6 +140,15 @@ Spor 2 leverer ferdig tolket anbefaling til Spor 3:
     "alternativ_id": "alt-1",
     "estimert_ankomst_hjem": "2026-03-25T16:15:00+01:00"
   },
+  "beslutningslogg": {
+    "situasjon": "Vanlig tog (RE11) er innstilt grunnet signalfeil ved Asker",
+    "vurderte_alternativer": [
+      { "alternativ": "buss", "vurdering": "mulig", "årsak": "lengre reisetid og flere bytter" },
+      { "alternativ": "gange", "vurdering": "avvist", "årsak": "for lang avstand" },
+      { "alternativ": "sykkel", "vurdering": "avvist", "årsak": "du har tidligere sagt at du ikke liker å sykle" }
+    ],
+    "konklusjon": "Reis tidligere med 15:02-toget — det er det beste tilgjengelige alternativet"
+  },
   "andre_alternativer": [
     {
       "handling": "alternativ_rute",
@@ -175,3 +184,4 @@ For reiseværmelding brukes samme format men med `"type": "værmelding"` og lave
 - /shared endres kun etter avtale i teamet
 - Mock-data i /shared brukes til alle spor kan integreres
 - En notifikasjon har alltid: (1) hva som skjedde, (2) en tydelig anbefaling, (3) andre alternativer med ankomsttid
+- KI-motorens beslutningslogg skal alltid være synlig for brukeren: hvilke alternativer som ble vurdert, hvorfor de ble forkastet eller valgt, og konklusjonen — slik at brukeren forstår grunnlaget for anbefalingen
