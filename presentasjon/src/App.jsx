@@ -1,14 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Heading3 } from '@entur/typography'
 import DisruptionAlert from './components/DisruptionAlert.jsx'
-import disruptionData from './mock/disruption.json'
+
+const API_URL = 'http://localhost:8000/api/anbefaling?direction=fra_jobb'
 
 export default function App() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [selectedAction, setSelectedAction] = useState(null)
+
+  useEffect(() => {
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(json => { setData(json); setLoading(false) })
+      .catch(err => { setError(err.message); setLoading(false) })
+  }, [])
 
   function handleSelect(action, description) {
     setSelectedAction({ action, description, timestamp: new Date().toISOString() })
     console.log('User selected:', { action, description })
+  }
+
+  function handleRefresh() {
+    setLoading(true)
+    setError(null)
+    setSelectedAction(null)
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(json => { setData(json); setLoading(false) })
+      .catch(err => { setError(err.message); setLoading(false) })
   }
 
   return (
@@ -17,13 +38,28 @@ export default function App() {
         <Heading3 margin="none">Pendlerkompis</Heading3>
       </header>
 
-      {selectedAction ? (
-        <SelectionConfirmation
-          selection={selectedAction}
-          onUndo={() => setSelectedAction(null)}
-        />
-      ) : (
-        <DisruptionAlert data={disruptionData} onSelect={handleSelect} />
+      {loading && <p style={{ textAlign: 'center', padding: '2rem' }}>Henter reisedata...</p>}
+      {error && <p style={{ textAlign: 'center', padding: '2rem', color: 'red' }}>Feil: {error}</p>}
+
+      {!loading && !error && data && (
+        selectedAction ? (
+          <SelectionConfirmation
+            selection={selectedAction}
+            onUndo={() => setSelectedAction(null)}
+          />
+        ) : (
+          <>
+            <DisruptionAlert data={data} onSelect={handleSelect} />
+            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+              <button onClick={handleRefresh} style={{
+                padding: '0.5rem 1rem', background: 'none',
+                border: '1px solid #ccc', borderRadius: '4px', cursor: 'pointer'
+              }}>
+                Oppdater
+              </button>
+            </div>
+          </>
+        )
       )}
     </div>
   )
