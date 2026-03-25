@@ -7,7 +7,11 @@ import httpx
 from data.queries.trip_query import TRIP_QUERY, trip_variables
 from data.queries.quay_query import QUAY_DEPARTURES_QUERY, quay_variables
 
-JOURNEY_PLANNER_URL = "https://api.entur.io/journey-planner/v3/graphql"
+import os
+JOURNEY_PLANNER_URL = os.environ.get(
+    "JOURNEY_PLANNER_URL",
+    "https://api.entur.io/journey-planner/v3/graphql",
+)
 HEADERS = {
     "ET-Client-Name": "entur-pendlerkompis",
     "Content-Type": "application/json",

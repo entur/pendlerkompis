@@ -1,6 +1,15 @@
 # Dependencies
 node_modules/
 
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Runtime data
+motor/feedback.jsonl
+
 # Build output
 dist/
 
