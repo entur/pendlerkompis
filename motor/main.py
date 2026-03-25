@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
+from data.avvik_simulator import injiser_avvik
 from data.main import hent_pendlerdata
 from motor.klassifiser import klassifiser
 from motor.models import KontraktB
@@ -22,6 +23,9 @@ async def analyser(direction: str = "fra_jobb", override_time: str | None = None
 
     # 1. Hent Kontrakt A fraa data-laget
     kontrakt_a = await hent_pendlerdata(direction=direction, override_time=override_time)
+
+    # 1b. Simuler avvik (~50 % av kall) for demo/testing
+    kontrakt_a = injiser_avvik(kontrakt_a)
 
     # 2. Klassifiser situasjonen
     type_, alvorlighet = klassifiser(kontrakt_a)
