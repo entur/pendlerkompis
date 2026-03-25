@@ -32,14 +32,6 @@ export default function App() {
     }
   }, [motor.recommendation, notifiedAvvikId, permission, sendNotification])
 
-  // Stop polling when user has made a selection
-  useEffect(() => {
-    if (selectedAction) {
-      motor.stopPolling()
-    } else if (!isDemoMode) {
-      motor.startPolling()
-    }
-  }, [selectedAction])
 
   function handleSelect(action, description, alternativId) {
     setSelectedAction({ action, description, timestamp: new Date().toISOString() })
@@ -77,6 +69,8 @@ export default function App() {
         <HomeScreen
           isDemoMode={isDemoMode}
           motorError={motor.error}
+          isLoading={motor.isLoading}
+          onRefresh={motor.refresh}
           onSimulateDisruption={handleSimulateDisruption}
         />
       )}
@@ -84,7 +78,7 @@ export default function App() {
   )
 }
 
-function HomeScreen({ isDemoMode, motorError, onSimulateDisruption }) {
+function HomeScreen({ isDemoMode, motorError, isLoading, onRefresh, onSimulateDisruption }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div style={{
@@ -94,15 +88,27 @@ function HomeScreen({ isDemoMode, motorError, onSimulateDisruption }) {
       }}>
         <Paragraph>Ingen avvik på reisen din akkurat nå.</Paragraph>
         {!isDemoMode && (
-          <Paragraph style={{ fontSize: '0.8rem', color: '#999', marginTop: '0.5rem' }}>
-            Sjekker hvert 10. sekund...
-          </Paragraph>
+          <button
+            onClick={onRefresh}
+            disabled={isLoading}
+            style={{
+              marginTop: '1rem',
+              padding: '0.5rem 1.25rem',
+              background: 'none',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              cursor: isLoading ? 'default' : 'pointer',
+              color: '#555',
+            }}
+          >
+            {isLoading ? 'Sjekker...' : 'Sjekk nå'}
+          </button>
         )}
       </div>
 
       {!isDemoMode && motorError && (
         <SmallAlertBox variant="warning">
-          Kan ikke nå motoren ({motorError}). Prøver igjen...
+          Kan ikke nå motoren ({motorError})
         </SmallAlertBox>
       )}
 

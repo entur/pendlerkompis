@@ -47,14 +47,25 @@ async def anbefaling(
     direction: str = Query("fra_jobb", pattern="^(fra_hjem|fra_jobb)$"),
     time: str | None = Query(None, description="Override avreisetid HH:MM"),
     mock: bool = Query(False, description="Bruk mock-data"),
+    smart: bool = Query(True, description="Hopp over Claude hvis ingen avvik"),
     verbose: bool = Query(False),
 ):
-    """Hent anbefaling for Rolf. Returnerer Kontrakt B."""
+    """Hent anbefaling for Rolf. Returnerer Kontrakt B.
+
+    Med smart=true (standard): sjekker for avvik først — kaller kun Claude ved avvik.
+    Med smart=false: kaller alltid Claude (brukes til testing).
+    """
     try:
-        from motor.main import generate_recommendation, generate_recommendation_from_mock
+        from motor.main import (
+            generate_recommendation,
+            generate_recommendation_from_mock,
+            generate_recommendation_smart,
+        )
 
         if mock:
             result = await generate_recommendation_from_mock(verbose=verbose)
+        elif smart:
+            result = await generate_recommendation_smart(direction, time, verbose=verbose)
         else:
             result = await generate_recommendation(direction, time, verbose=verbose)
 

@@ -1,25 +1,23 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useCallback } from 'react'
 
 const MOTOR_BASE_URL = 'http://localhost:8082'
-const POLL_INTERVAL_MS = 10_000
 
 /**
- * Hook that polls the motor API for recommendations every 10 seconds.
+ * Hook for manually fetching recommendations from the motor API.
  * Returns the latest recommendation (Kontrakt B) if there is an active disruption.
  */
 export default function useMotorApi() {
   const [recommendation, setRecommendation] = useState(null)
   const [error, setError] = useState(null)
-  const [isPolling, setIsPolling] = useState(true)
-  const intervalRef = useRef(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const fetchRecommendation = useCallback(async () => {
+    setIsLoading(true)
     try {
-      const res = await fetch(`${MOTOR_BASE_URL}/anbefaling?direction=fra_jobb`)
+      const res = await fetch(`${MOTOR_BASE_URL}/anbefaling?direction=fra_hjem&time=16:00`)
       if (!res.ok) throw new Error(`Motor API: ${res.status}`)
       const data = await res.json()
 
-      // Only update if there is an active disruption
       if (data.type === 'avvik' && data.situasjon?.alvorlighet !== 'ingen') {
         setRecommendation(data)
       } else {
@@ -27,28 +25,15 @@ export default function useMotorApi() {
       }
       setError(null)
     } catch (e) {
-      console.warn('[Motor API] Polling failed:', e.message)
+      console.warn('[Motor API] Fetch failed:', e.message)
       setError(e.message)
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
-  useEffect(() => {
-    if (!isPolling) return
-
-    fetchRecommendation()
-    intervalRef.current = setInterval(fetchRecommendation, POLL_INTERVAL_MS)
-
-    return () => clearInterval(intervalRef.current)
-  }, [isPolling, fetchRecommendation])
-
-  const stopPolling = useCallback(() => {
-    setIsPolling(false)
-    clearInterval(intervalRef.current)
-  }, [])
-
-  const startPolling = useCallback(() => {
-    setIsPolling(true)
-  }, [])
+  const stopPolling = useCallback(() => {}, [])
+  const startPolling = useCallback(() => {}, [])
 
   const sendFeedback = useCallback(async (action, alternativId) => {
     try {
@@ -70,7 +55,8 @@ export default function useMotorApi() {
   return {
     recommendation,
     error,
-    isPolling,
+    isLoading,
+    refresh: fetchRecommendation,
     stopPolling,
     startPolling,
     sendFeedback,
