@@ -1,23 +1,26 @@
-# Spor 2: Motor (analyse og KI)
+# Spor 2: Motor (all backend-kode)
 
-Du jobber med analysemotoren for Pendlerkompis — hjernen i systemet.
+Du jobber med motoren for Pendlerkompis — all backend-kode lever her.
 
 ## Ditt ansvar
 
-1. **Vurdere relevans:** Paavirker avviket brukerens reise?
-2. **Tolke situasjonen:** Bruk Claude API til aa generere en forstaelig oppsummering
-3. **Finne alternativer:** Velg og ranger reisealternativer fra Spor 1
-4. **Anbefale:** Velg en tydelig anbefaling + andre alternativer med estimert ankomsttid
-5. **Reisevaermelding:** Periodisk vurdering foer avgang, ogsaa naar det ikke er avvik
+1. **Hente data** fra Entur API-er basert paa spesifikasjonene fra Spor 1 (/data)
+2. **Forvalte brukerprofiler** (hjem, jobb, avreisetider, laerte preferanser)
+3. **Vurdere relevans:** Paavirker avviket brukerens reise?
+4. **Tolke situasjonen:** Bruk Claude API til aa generere en forstaelig oppsummering
+5. **Finne og rangere alternativer** fra JourneyPlanner
+6. **Anbefale:** Velg en tydelig anbefaling + andre alternativer med estimert ankomsttid
+7. **Reisevaermelding:** Periodisk vurdering foer avgang, ogsaa naar det ikke er avvik
+8. **Eksponere API** som Spor 3 (Presentasjon) konsumerer
 
-## Kontrakt A (din input)
+## Kontrakt A (intern datamodell)
 
-Se /shared/kontrakt-a.json — dette faar du fra Spor 1.
-Inneholder: brukerprofil, aktive avvik, tilgjengelige reisealternativer.
+Se /shared/kontrakt-a.json — dette er dataformatet spesifisert av Spor 1.
+Du implementerer koden som henter og strukturerer data i dette formatet.
 
-## Kontrakt B (din output)
+## Kontrakt B (din output til Spor 3)
 
-Se /shared/kontrakt-b.json — dette leverer du til Spor 3.
+Se /shared/kontrakt-b.json — dette leverer du til Presentasjon.
 Inneholder: situasjonsoppsummering, anbefaling, andre alternativer.
 
 En anbefaling har ALLTID:
@@ -33,6 +36,5 @@ En anbefaling har ALLTID:
 
 ## Avgrensning
 
-- Du henter IKKE data selv — det gjoer Spor 1 (Data inn)
+- Sjekk /data for API-dokumentasjon og spesifikasjoner fra Spor 1
 - Du viser IKKE noe til brukeren — det gjoer Spor 3 (Presentasjon)
-- Du tar inn Kontrakt A og leverer Kontrakt B

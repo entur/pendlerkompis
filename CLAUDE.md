@@ -4,25 +4,26 @@ KI-drevet reiseassistent som proaktivt varsler dagpendlere om avvik og gir perso
 
 ## Arkitektur
 
-Tre spor i en pipeline:
+Tre spor i en pipeline. Spor 1 er et spesifikasjonsspor — all kode lever i Spor 2 og 3.
 
 ```
 ┌──────────────┐  Kontrakt A  ┌──────────────┐  Kontrakt B  ┌──────────────┐
-│  Spor 1:     │─────────────>│  Spor 2:     │─────────────>│  Spor 3:     │
-│  DATA INN    │              │  MOTOR       │              │  PRESENTASJON│
+│  Spor 1:     │  (spek/dok)  │  Spor 2:     │─────────────>│  Spor 3:     │
+│  DATA        │─────────────>│  MOTOR       │              │  PRESENTASJON│
+│  (spesifik.) │              │  (all kode)  │              │  (frontend)  │
 │  /data       │              │  /motor      │              │  /presentasjon│
 └──────────────┘              └──────────────┘              └──────────────┘
 ```
 
-- **Spor 1 (Data inn):** Henter avviksdata fra Entur API-er og forvalter brukerprofiler
-- **Spor 2 (Motor):** Analyserer data, bruker Claude API til aa tolke situasjonen, og genererer anbefalinger
-- **Spor 3 (Presentasjon):** Frontend/UI som viser varsler, vaermelding og onboarding til brukeren
+- **Spor 1 (Data):** Utforsker Entur API-er, spesifiserer dataformat, dokumenterer brukerprofil. Leverer Kontrakt A og API-dokumentasjon. **Skriver ikke applikasjonskode.**
+- **Spor 2 (Motor):** All backend-kode. Henter data fra Entur API-er (basert paa Spor 1 sin spesifikasjon), analyserer, bruker Claude API, genererer anbefalinger. Leverer Kontrakt B.
+- **Spor 3 (Presentasjon):** Frontend/UI. Konsumerer Kontrakt B, viser varsler og vaermelding.
 
 ## Mappestruktur
 
 ```
-/data            # Spor 1: Datahenting (Entur API) og brukerprofil
-/motor           # Spor 2: Analyse og KI (Claude API)
+/data            # Spor 1: Spesifikasjon, API-dokumentasjon, dataformat
+/motor           # Spor 2: All backend-kode (datahenting + analyse + KI)
 /presentasjon    # Spor 3: Frontend/UI
 /shared          # Kontrakter (A + B) og mock-data
 ```
@@ -44,7 +45,7 @@ Dagpendler Drammen <-> Raadhusgata 5, Oslo. Kjenner reisen sin godt.
 
 Se /shared/kontrakt-a.json for skjema.
 
-Spor 1 leverer strukturert data til Spor 2:
+Spor 1 spesifiserer dataformatet. Spor 2 implementerer hentingen.
 
 ```json
 {
@@ -82,18 +83,6 @@ Spor 1 leverer strukturert data til Spor 2:
       "steg": [
         { "type": "gange", "fra": "Raadhusgata 5", "til": "Oslo S", "varighet_min": 12 },
         { "type": "tog", "linje": "RE11", "fra": "Oslo S", "til": "Drammen", "varighet_min": 50 }
-      ],
-      "status": "i_rute"
-    },
-    {
-      "id": "alt-2",
-      "beskrivelse": "Buss 31 til Lysaker, tog videre",
-      "avgang": "2026-03-25T16:35:00+01:00",
-      "estimert_ankomst": "2026-03-25T18:00:00+01:00",
-      "steg": [
-        { "type": "gange", "fra": "Raadhusgata 5", "til": "Jernbanetorget", "varighet_min": 8 },
-        { "type": "buss", "linje": "31", "fra": "Jernbanetorget", "til": "Lysaker", "varighet_min": 25 },
-        { "type": "tog", "linje": "L1", "fra": "Lysaker", "til": "Drammen", "varighet_min": 40 }
       ],
       "status": "i_rute"
     }
@@ -150,6 +139,8 @@ For reisevaermelding brukes samme format men med `"type": "vaermelding"` og lave
 
 ## Regler
 
+- Spor 1 skriver spesifikasjoner og dokumentasjon, IKKE applikasjonskode
+- All applikasjonskode lever i Spor 2 (motor) og Spor 3 (presentasjon)
 - Hvert spor jobber i sin egen mappe og paa sin egen branch
 - /shared endres kun etter avtale i teamet
 - Mock-data i /shared brukes til alle spor kan integreres
