@@ -8,9 +8,9 @@ data kvart 3–10 sekund.
 import asyncio
 import json
 import random
-import threading
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 from urllib.parse import urlparse, parse_qs
 from pathlib import Path
 
@@ -39,7 +39,11 @@ class MotorHandler(BaseHTTPRequestHandler):
         direction = params.get("direction", ["fra_jobb"])[0]
         override_time = params.get("time", [None])[0]
         try:
-            result = asyncio.run(analyser(direction=direction, override_time=override_time))
+            loop = asyncio.new_event_loop()
+            try:
+                result = loop.run_until_complete(analyser(direction=direction, override_time=override_time))
+            finally:
+                loop.close()
             self._send_json(200, result)
         except Exception as e:
             self._send_json(500, {"error": str(e)})
@@ -62,7 +66,11 @@ class MotorHandler(BaseHTTPRequestHandler):
         try:
             while True:
                 try:
-                    result = asyncio.run(analyser(direction=direction))
+                    loop = asyncio.new_event_loop()
+                    try:
+                        result = loop.run_until_complete(analyser(direction=direction))
+                    finally:
+                        loop.close()
                     payload = json.dumps(result, ensure_ascii=False)
                     self.wfile.write(f"id: {seq}\n".encode())
                     self.wfile.write(f"event: anbefaling\n".encode())
@@ -95,10 +103,13 @@ class MotorHandler(BaseHTTPRequestHandler):
         print(f"[motor-server] {args[0]}")
 
 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+
+
 def main():
     port = 8000
-    server = HTTPServer(("", port), MotorHandler)
-    server.daemon_threads = True
+    server = ThreadedHTTPServer(("", port), MotorHandler)
     print(f"Motor-server kjoerer paa http://localhost:{port}")
     print(f"  GET /api/anbefaling?direction=fra_jobb       (enkelt-kall)")
     print(f"  GET /api/stream?direction=fra_jobb            (SSE live-stream)")
