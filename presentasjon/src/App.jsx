@@ -5,13 +5,16 @@ import DisruptionAlert from './components/DisruptionAlert.jsx'
 import NotificationPrompt from './components/NotificationPrompt.jsx'
 import useMotorApi from './hooks/useMotorApi.js'
 import useNotification from './hooks/useNotification.js'
-import disruptionData from './mock/disruption.json'
+import case1Data from './mock/disruption-case1.json'
+import case2Data from './mock/disruption-case2.json'
 
 const isDemoMode = new URLSearchParams(window.location.search).has('demo')
 
+const mockCases = { case1: case1Data, case2: case2Data }
+
 export default function App() {
   const [selectedAction, setSelectedAction] = useState(null)
-  const [showMockDisruption, setShowMockDisruption] = useState(false)
+  const [activeCase, setActiveCase] = useState(null)
   const motor = useMotorApi()
   const { permission, sendNotification } = useNotification()
   const [notifiedAvvikId, setNotifiedAvvikId] = useState(null)
@@ -44,15 +47,20 @@ export default function App() {
     console.log('User selected:', { action, description })
   }
 
+  function handleSimulateDisruption(caseId) {
+    setSelectedAction(null)
+    setActiveCase(caseId)
+  }
+
   function handleReset() {
     setSelectedAction(null)
-    setShowMockDisruption(false)
+    setActiveCase(null)
     setNotifiedAvvikId(null)
   }
 
   // Determine which data to show
   const activeData = isDemoMode
-    ? (showMockDisruption ? disruptionData : null)
+    ? (activeCase ? mockCases[activeCase] : null)
     : motor.recommendation
 
   return (
@@ -69,7 +77,7 @@ export default function App() {
         <HomeScreen
           isDemoMode={isDemoMode}
           motorError={motor.error}
-          onSimulateDisruption={() => setShowMockDisruption(true)}
+          onSimulateDisruption={handleSimulateDisruption}
         />
       )}
     </div>

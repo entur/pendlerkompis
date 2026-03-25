@@ -1,0 +1,30 @@
+{
+  "bruker_id": "rolf-1",
+  "type": "avvik",
+  "tidspunkt": "2026-03-25T15:20:00+01:00",
+  "situasjon": {
+    "oppsummering": "Signalfeil på Majorstuen stasjon. T-bane linje 2 mot Østerås kjører ikke som planlagt. Neste avgang fra Jernbanetorget kan bli forsinket eller innstilt.",
+    "alvorlighet": "høy",
+    "avvik_ids": ["sx-tbane-001"]
+  },
+  "anbefaling": {
+    "handling": "reis_tidligere",
+    "beskrivelse": "Ta T-banen nå — den går fortsatt. Drar du med en gang rekker du avgangen fra Jernbanetorget. Hjemme på Smestad ca. 16:20.",
+    "alternativ_id": "alt-1",
+    "estimert_ankomst_hjem": "2026-03-25T16:20:00+01:00"
+  },
+  "andre_alternativer": [
+    {
+      "handling": "alternativ_rute",
+      "beskrivelse": "Buss fra Jernbanetorget. Linje 34 eller 24 til Majorstuen, bytt til linje 81 eller 28 til Smestad. Hjemme ca. 17:00.",
+      "alternativ_id": "alt-2",
+      "estimert_ankomst_hjem": "2026-03-25T17:00:00+01:00"
+    },
+    {
+      "handling": "utsett",
+      "beskrivelse": "Vent til avviket er over. Ukjent varighet — kan ta alt fra 20 minutter til over en time.",
+      "alternativ_id": null,
+      "estimert_ankomst_hjem": null
+    }
+  ]
+}

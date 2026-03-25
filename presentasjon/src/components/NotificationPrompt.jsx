@@ -3,34 +3,23 @@ import { PrimaryButton, SecondaryButton } from '@entur/button'
 import { Paragraph } from '@entur/typography'
 import { SmallAlertBox } from '@entur/alert'
 import useNotification from '../hooks/useNotification.js'
-import disruptionData from '../mock/disruption.json'
 
 export default function NotificationPrompt({ onSimulateDisruption }) {
-  const { permission, isSupported, isReady, requestPermission, sendNotification } = useNotification()
+  const { permission, isSupported, requestPermission, sendNotification } = useNotification()
   const [simulated, setSimulated] = useState(false)
 
   async function handleEnable() {
     const result = await requestPermission()
     if (result === 'granted') {
-      console.log('[Demo] Notifications enabled. Check macOS System Settings > Notifications if they do not appear.')
+      console.log('[Demo] Notifications enabled.')
     }
   }
 
-  function handleSimulate() {
-    const { situasjon } = disruptionData
-    setSimulated(true)
-
-    const sent = sendNotification(
-      'Avvik på hjemreisen din',
-      situasjon.oppsummering
-    )
-
-    if (!sent) {
-      console.warn('[Demo] Notification not sent. Check: (1) browser permission, (2) macOS System Settings > Notifications > [browser]')
-    }
-
+  function handleSimulate(caseId, title, body) {
+    setSimulated(caseId)
+    sendNotification(title, body)
     setTimeout(() => {
-      onSimulateDisruption?.()
+      onSimulateDisruption?.(caseId)
     }, 1000)
   }
 
@@ -55,8 +44,27 @@ export default function NotificationPrompt({ onSimulateDisruption }) {
           <SmallAlertBox variant="success">
             Varsler er aktivert
           </SmallAlertBox>
-          <SecondaryButton onClick={handleSimulate} disabled={simulated} style={{ width: '100%' }}>
-            {simulated ? 'Sender varsel...' : 'Simuler avvik'}
+          <SecondaryButton
+            onClick={() => handleSimulate(
+              'case1',
+              'Avvik på hjemreisen din',
+              'Signalfeil på Majorstuen. T-bane linje 2 kjører ikke som planlagt.'
+            )}
+            disabled={!!simulated}
+            style={{ width: '100%' }}
+          >
+            Simuler: T-bane stopp (Jernbanetorget → Smestad)
+          </SecondaryButton>
+          <SecondaryButton
+            onClick={() => handleSimulate(
+              'case2',
+              'Avvik på hjemreisen din',
+              'E18/Mosseveien er stengt. Buss 500 til Drøbak går ikke.'
+            )}
+            disabled={!!simulated}
+            style={{ width: '100%' }}
+          >
+            Simuler: E18 stengt (Bjørvika → Drøbak)
           </SecondaryButton>
           <Paragraph style={{ fontSize: '0.85rem', color: '#666' }}>
             Sjekk at nettleseren har tillatelse i Systeminnstillinger &gt; Varsler hvis notifikasjonen ikke vises.
