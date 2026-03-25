@@ -114,9 +114,19 @@ class Bildata(TypedDict, total=False):
     kilde: str  # "osrm+vegvesen_trafikkdata"
 
 
+class Vaerdata(TypedDict, total=False):
+    tidspunkt: str  # ISO-8601 — closest forecast time to requested departure
+    lufttemperatur_c: float
+    vindstyrke_ms: float
+    nedbor_neste_time_mm: float | None  # precipitation next 1h, None if unavailable
+    symbolkode: str | None  # yr symbol code e.g. "cloudy", "rain", "clearsky_day"
+    kilde: str  # "met.no/locationforecast/2.0"
+
+
 class KontraktAUtvidet(TypedDict):
     bruker: Bruker
     avvik: list[Avvik]
     reisealternativer: list[Reisealternativ]
     sanntidsdata: Sanntidsdata
     bildata: Bildata
+    vaerdata: Vaerdata

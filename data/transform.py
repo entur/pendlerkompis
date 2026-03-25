@@ -17,6 +17,7 @@ from data.models import (
     Sanntidsdata,
     Steg,
     TrafikkPunkt,
+    Vaerdata,
 )
 
 # --- Mapping tables ---
@@ -384,6 +385,41 @@ def build_bildata(
     }
 
 
+# --- Weather data ---
+
+def build_vaerdata(forecast_entry: dict) -> Vaerdata:
+    """Transform a MET.no Locationforecast timeseries entry into Vaerdata."""
+    if not forecast_entry:
+        return {
+            "tidspunkt": "",
+            "lufttemperatur_c": 0.0,
+            "vindstyrke_ms": 0.0,
+            "nedbor_neste_time_mm": None,
+            "symbolkode": None,
+            "kilde": "met.no/locationforecast/2.0",
+        }
+
+    details = forecast_entry.get("data", {}).get("instant", {}).get("details", {})
+    next_1h = forecast_entry.get("data", {}).get("next_1_hours", {})
+
+    precipitation = None
+    if next_1h:
+        precipitation = next_1h.get("details", {}).get("precipitation_amount")
+
+    symbol = None
+    if next_1h and next_1h.get("summary"):
+        symbol = next_1h["summary"].get("symbol_code")
+
+    return {
+        "tidspunkt": forecast_entry.get("time", ""),
+        "lufttemperatur_c": details.get("air_temperature", 0.0),
+        "vindstyrke_ms": details.get("wind_speed", 0.0),
+        "nedbor_neste_time_mm": precipitation,
+        "symbolkode": symbol,
+        "kilde": "met.no/locationforecast/2.0",
+    }
+
+
 # --- Assemble final output ---
 
 def build_kontrakt_a(
@@ -394,6 +430,7 @@ def build_kontrakt_a(
     forsinkelsesstatistikk: list[ForsinkelsesStatistikk],
     innstillinger: list[Innstilling],
     bildata: Bildata | None = None,
+    vaerdata: Vaerdata | None = None,
 ) -> KontraktAUtvidet:
     result: KontraktAUtvidet = {
         "bruker": bruker,
@@ -405,5 +442,6 @@ def build_kontrakt_a(
             "innstillinger": innstillinger,
         },
         "bildata": bildata or {},
+        "vaerdata": vaerdata or {},
     }
     return result

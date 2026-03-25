@@ -93,6 +93,29 @@ POST https://trafikkdata-api.atlas.vegvesen.no/ (GraphQL)
 
 ---
 
+### 5. MET.no Locationforecast 2.0 — Værdata
+
+**Formål:** Hente værprognose for avgangsstedet ved avreisetidspunkt. Gir motoren kontekst om temperatur, vind og nedbør som kan påvirke reisevalg og anbefalinger.
+
+**Endepunkt:**
+```
+GET https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={lat}&lon={lon}
+```
+
+**Data vi henter:**
+- `air_temperature` — lufttemperatur i °C
+- `wind_speed` — vindstyrke i m/s
+- `precipitation_amount` — nedbør neste time i mm (fra `next_1_hours`)
+- `symbol_code` — Yr-symbolkode (f.eks. `cloudy`, `rain`, `clearsky_day`)
+
+**Logikk:** Vi henter hele tidsserien og velger oppføringen nærmest brukerens avreisetidspunkt.
+
+**Autentisering:** Ingen API-nøkkel, men `User-Agent`-header er **påkrevd** per MET.no sine bruksvilkår.
+
+**Begrensninger:** Prognose-presisjon avhenger av hvor langt frem i tid avgangen er. Inntil ~48 timer frem er oppløsningen per time.
+
+---
+
 ## API-er vi IKKE bruker (og hvorfor)
 
 | API | Grunn til å utelate |
@@ -125,6 +148,11 @@ POST https://trafikkdata-api.atlas.vegvesen.no/ (GraphQL)
 │   ankomst  │ │   + avstand   │ │ → volum historisk │
 └──────┬─────┘ └──────┬────────┘ └────────┬─────────┘
        │              │                    │
+       │         ┌────┴────┐               │
+       │         │ MET.no  │               │
+       │         │ → vær-  │               │
+       │         │ prognose│               │
+       │         └────┬────┘               │
        ▼              ▼                    ▼
 ┌──────────────────────────────────────────────────────┐
 │  Transform + beregning                               │
@@ -133,11 +161,12 @@ POST https://trafikkdata-api.atlas.vegvesen.no/ (GraphQL)
 │  → reisealternativer[] med status og steg            │
 │  → sanntidsdata (forsinkelser, kanselleringer)        │
 │  → bildata (fri-flyt + trafikkjustert reisetid)      │
+│  → vaerdata (temperatur, vind, nedbør)                │
 └──────────────────┬───────────────────────────────────┘
                    │
                    ▼
       Bygg Kontrakt A (utvidet)
-      (bruker + avvik + alternativer + sanntidsdata + bildata)
+      (bruker + avvik + alternativer + sanntidsdata + bildata + vaerdata)
                    │
                    ▼
       Motor analyserer → Kontrakt B
@@ -203,7 +232,22 @@ I tillegg til standard Kontrakt A (`bruker`, `avvik`, `reisealternativer`) lever
 }
 ```
 
-Begge seksjonene er additive — de bryter ikke Kontrakt A for konsumenter som ignorerer dem.
+### vaerdata — værprognose ved avgang
+
+```json
+{
+  "vaerdata": {
+    "tidspunkt": "2026-03-25T16:00:00Z",
+    "lufttemperatur_c": 4.2,
+    "vindstyrke_ms": 3.8,
+    "nedbor_neste_time_mm": 0.3,
+    "symbolkode": "cloudy",
+    "kilde": "met.no/locationforecast/2.0"
+  }
+}
+```
+
+Alle tilleggsseksjoner er additive — de bryter ikke Kontrakt A for konsumenter som ignorerer dem.
 
 ## Bruk (CLI)
 
@@ -220,3 +264,5 @@ PYTHONPATH=. .venv/bin/python -m data.main --direction fra_hjem --time 07:15
 **OSRM:** Offentlig demo-server, ingen autentisering.
 
 **Vegvesen Trafikkdata:** Åpent GraphQL-API, ingen autentisering.
+
+**MET.no Locationforecast:** Åpent API under norsk lisens. Ingen API-nøkkel, men `User-Agent`-header med appnavn og kontakt er **påkrevd**.

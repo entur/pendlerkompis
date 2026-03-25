@@ -21,10 +21,12 @@ from data.bruker import get_bruker, get_trip_params
 from data.clients.journey_planner import query_trips, query_quay_departures
 from data.clients.realtime import query_recent_arrivals, query_invalid_et
 from data.clients.road import query_osrm_route, query_current_volume, query_historical_volume
+from data.clients.weather import query_weather_forecast
 from data.models import KontraktAUtvidet
 from data.transform import (
     build_bildata,
     build_kontrakt_a,
+    build_vaerdata,
     compute_delay_statistics,
     extract_destination_quay_ids,
     extract_faktiske_ankomster,
@@ -95,15 +97,23 @@ async def hent_pendlerdata(
         osrm_task = query_osrm_route(params["from_coords"], params["to_coords"], client=client)
         volume_task = query_current_volume(now, client=client)
 
+        # Weather forecast at departure location
+        departure_coords = params["from_coords"]
+        departure_dt = datetime.fromisoformat(params["date_time"])
+        weather_task = query_weather_forecast(
+            departure_coords[0], departure_coords[1], departure_dt, client=client
+        )
+
         results = await asyncio.gather(
-            historical_task, osrm_task, volume_task,
+            historical_task, osrm_task, volume_task, weather_task,
             *quay_tasks,
             return_exceptions=True,
         )
         historical_data = results[0] if not isinstance(results[0], Exception) else {"trip": {"tripPatterns": []}}
         osrm_result = results[1] if not isinstance(results[1], Exception) else None
         current_volumes = results[2] if not isinstance(results[2], Exception) else []
-        quay_results = [r for r in results[3:] if not isinstance(r, Exception)]
+        weather_entry = results[3] if not isinstance(results[3], Exception) else {}
+        quay_results = [r for r in results[4:] if not isinstance(r, Exception)]
 
         # Determine the hour of the latest available volume data and fetch
         # historical averages for that same hour (Trafikkdata has ~3h lag)
@@ -150,9 +160,12 @@ async def hent_pendlerdata(
             print("Building car travel data...", file=sys.stderr)
             bildata = build_bildata(osrm_result, current_volumes, historical_avgs)
 
-        # Step 10: Assemble
+        # Step 10: Weather data
+        vaerdata = build_vaerdata(weather_entry)
+
+        # Step 11: Assemble
         return build_kontrakt_a(
-            bruker, avvik, alternativer, faktiske, statistikk, innstillinger, bildata
+            bruker, avvik, alternativer, faktiske, statistikk, innstillinger, bildata, vaerdata
         )
 
 

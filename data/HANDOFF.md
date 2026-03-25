@@ -46,6 +46,12 @@ Skriver JSON til stdout.
 | `bildata.trafikk_punkter[]` | Trafikkvolum ved 5 E18-stasjoner | Vegvesen Trafikkdata API |
 | `bildata.estimert_reisetid_min` | Trafikkjustert kjoeretid (fri-flyt * snitt kapasitetsutnyttelse) | Beregnet fra OSRM + Trafikkdata |
 | `bildata.kilde` | Datakilder brukt | Alltid `"osrm+vegvesen_trafikkdata"` |
+| `vaerdata.tidspunkt` | Nærmeste prognosetidspunkt til avgang | MET.no Locationforecast 2.0 |
+| `vaerdata.lufttemperatur_c` | Lufttemperatur i °C | MET.no Locationforecast 2.0 |
+| `vaerdata.vindstyrke_ms` | Vindstyrke i m/s | MET.no Locationforecast 2.0 |
+| `vaerdata.nedbor_neste_time_mm` | Nedbør neste time i mm (null hvis utilgjengelig) | MET.no Locationforecast 2.0 |
+| `vaerdata.symbolkode` | Yr-symbolkode (f.eks. "cloudy", "rain", "clearsky_day") | MET.no Locationforecast 2.0 |
+| `vaerdata.kilde` | Datakilde | Alltid `"met.no/locationforecast/2.0"` |
 
 ## Hva motoren boer bruke dette til
 
@@ -55,6 +61,11 @@ Skriver JSON til stdout.
 3. **Er det et moenster av kanselleringer?** Se `sanntidsdata.innstillinger` — flere kanselleringer paa samme linje = hoey risiko
 4. **Hva skjedde de siste 2 timene?** Se `sanntidsdata.faktiske_ankomster` — nylige forsinkelser predikerer kommende forsinkelser
 5. **Avviksmeldinger for kontekst:** Se `avvik[]` for aa forstaa *hvorfor* ting er forsinket (signalfeil, sporveksel, etc.)
+
+### Vær
+9. **Bør Rolf kle seg annerledes?** Se `vaerdata.lufttemperatur_c` og `vaerdata.nedbor_neste_time_mm`. Nedbør >0.5 mm/t eller temperatur <0 °C kan være verdt å nevne.
+10. **Symbolkode for UI:** `vaerdata.symbolkode` kan brukes direkte mot Yr-ikoner. Se https://api.met.no/weatherapi/weathericon/2.0/documentation for mapping.
+11. **Er været relevant for reisevalg?** Sterk vind (>10 m/s) eller kraftig nedbør kan påvirke om Rolf bør velge bil fremfor tog/buss.
 
 ### Bil vs. tog (nytt)
 6. **Boer Rolf kjoere?** Sammenlign `bildata.estimert_reisetid_min` med `reisealternativer[].estimert_ankomst - avgang`. Dersom bil er raskere OG togene har forsinkelser/kanselleringer, kan motoren anbefale aa kjoere.
@@ -66,7 +77,7 @@ Skriver JSON til stdout.
 Alle datastrukturer er definert som `TypedDict` i `data/models.py`. Motoren kan importere disse for typesjekking:
 
 ```python
-from data.models import KontraktAUtvidet, Sanntidsdata, FaktiskAnkomst, Bildata, TrafikkPunkt
+from data.models import KontraktAUtvidet, Sanntidsdata, FaktiskAnkomst, Bildata, TrafikkPunkt, Vaerdata
 ```
 
 ## Avhengigheter
@@ -83,4 +94,4 @@ pip install httpx  # async HTTP client (eneste eksterne avhengighet)
 - Vegvesen Trafikkdata har ~3 timers lag. Vi bruker siste tilgjengelige time, ikke naavaerende time.
 - Bil-estimatet bruker trafikkvolum som koe-proxy — dette korrelerer godt i rushtid men er mindre presist ellers.
 - OSRM er en offentlig demo-server uten SLA. For produksjon boer vi bruke en self-hosted OSRM eller kommersiell API.
-- Én E18-stasjon (Drammensv v/Maritim) rapporterer ikke alltid data — den faar `kapasitetsutnyttelse: 1.0` som fallback.
+- Én E18-stasjon (Drammensv v/Maritim) rapporterer ikke alltid data — den faar `kapasitetsutnyttelse: 1.0` som fallback.- Værdata hentes fra MET.no Locationforecast 2.0 (gratis, krever User-Agent). Prognosen nærmest avgangsøyeblikket brukes — presisjon avhenger av hvor langt frem i tid avgangen er.
