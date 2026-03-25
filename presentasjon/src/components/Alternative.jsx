@@ -1,29 +1,25 @@
-import { SecondaryButton } from '@entur/button'
-import { Paragraph } from '@entur/typography'
-
 export default function Alternative({ action, description, arrivalTime, onSelect }) {
   return (
-    <div style={{
-      border: '1px solid var(--colors-greys-grey20, #ddd)',
-      borderRadius: '8px',
-      padding: '1rem',
-      marginTop: '0.75rem',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      gap: '1rem',
-    }}>
-      <div>
-        <Paragraph margin="none">{description}</Paragraph>
-        {arrivalTime && (
-          <Paragraph margin="none" style={{ fontWeight: 'bold', marginTop: '0.25rem' }}>
-            Hjemme ca. {arrivalTime}
-          </Paragraph>
-        )}
-      </div>
-      <SecondaryButton onClick={onSelect} size="small">
-        Velg
-      </SecondaryButton>
+    <div
+      onClick={onSelect}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onSelect()}
+      style={{
+        border: '1px solid #ccc',
+        borderRadius: '8px',
+        padding: '1rem',
+        marginTop: '0.75rem',
+        cursor: 'pointer',
+        background: 'white',
+      }}
+    >
+      <p style={{ margin: 0, fontSize: '1rem', lineHeight: 1.4 }}>{description}</p>
+      {arrivalTime && (
+        <p style={{ margin: '0.25rem 0 0', fontWeight: 'bold', fontSize: '1rem' }}>
+          Hjemme ca. {arrivalTime}
+        </p>
+      )}
     </div>
   )
 }
