@@ -1,0 +1,75 @@
+{
+  "bruker": {
+    "id": "rolf-1",
+    "hjem": {
+      "navn": "Drammen",
+      "koordinater": { "lat": 59.7441, "lon": 10.2045 }
+    },
+    "jobb": {
+      "navn": "Raadhusgata 5, Oslo",
+      "koordinater": { "lat": 59.9118, "lon": 10.7340 }
+    },
+    "avreisetider": {
+      "fra_hjem": "07:15",
+      "fra_jobb": "16:30"
+    },
+    "preferanser": {
+      "laert": [
+        {
+          "situasjon": "signalfeil",
+          "valgt_handling": "reis_tidligere",
+          "antall_ganger": 3
+        }
+      ]
+    }
+  },
+  "avvik": [
+    {
+      "id": "sx-12345",
+      "kilde": "SIRI-SX",
+      "type": "signalfeil",
+      "alvorlighet": "hoy",
+      "beskrivelse": "Signalfeil ved Asker stasjon. Tog paa strekningen Oslo S - Drammen er forsinket eller innstilt.",
+      "paavirker_linjer": ["L1", "RE11"],
+      "paavirker_stasjoner": ["Asker"],
+      "estimert_varighet_min": 60,
+      "oppstaat": "2026-03-25T14:30:00+01:00"
+    }
+  ],
+  "reisealternativer": [
+    {
+      "id": "alt-1",
+      "beskrivelse": "Tog fra Oslo S kl 15:02 (foer avviket forverres)",
+      "avgang": "2026-03-25T15:02:00+01:00",
+      "estimert_ankomst": "2026-03-25T16:15:00+01:00",
+      "steg": [
+        { "type": "gange", "fra": "Raadhusgata 5", "til": "Oslo S", "varighet_min": 12 },
+        { "type": "tog", "linje": "RE11", "fra": "Oslo S", "til": "Drammen", "varighet_min": 50 }
+      ],
+      "status": "i_rute"
+    },
+    {
+      "id": "alt-2",
+      "beskrivelse": "Buss 31 til Lysaker, tog videre til Drammen",
+      "avgang": "2026-03-25T16:35:00+01:00",
+      "estimert_ankomst": "2026-03-25T18:00:00+01:00",
+      "steg": [
+        { "type": "gange", "fra": "Raadhusgata 5", "til": "Jernbanetorget", "varighet_min": 8 },
+        { "type": "buss", "linje": "31", "fra": "Jernbanetorget", "til": "Lysaker", "varighet_min": 25 },
+        { "type": "tog", "linje": "L1", "fra": "Lysaker", "til": "Drammen", "varighet_min": 40 }
+      ],
+      "status": "i_rute"
+    },
+    {
+      "id": "alt-3",
+      "beskrivelse": "Vanlig tog kl 16:42 (mulig forsinket)",
+      "avgang": "2026-03-25T16:42:00+01:00",
+      "estimert_ankomst": "2026-03-25T17:50:00+01:00",
+      "steg": [
+        { "type": "gange", "fra": "Raadhusgata 5", "til": "Oslo S", "varighet_min": 12 },
+        { "type": "tog", "linje": "RE11", "fra": "Oslo S", "til": "Drammen", "varighet_min": 55 }
+      ],
+      "status": "forsinket"
+    }
+  ]
+}

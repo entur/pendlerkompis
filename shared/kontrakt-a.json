@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Kontrakt A: Data -> Motor",
+  "description": "Strukturert data fra Spor 1 til Spor 2",
+  "type": "object",
+  "required": ["bruker", "avvik", "reisealternativer"],
+  "properties": {
+    "bruker": {
+      "type": "object",
+      "required": ["id", "hjem", "jobb", "avreisetider"],
+      "properties": {
+        "id": { "type": "string" },
+        "hjem": {
+          "type": "object",
+          "required": ["navn", "koordinater"],
+          "properties": {
+            "navn": { "type": "string" },
+            "koordinater": {
+              "type": "object",
+              "properties": {
+                "lat": { "type": "number" },
+                "lon": { "type": "number" }
+              }
+            }
+          }
+        },
+        "jobb": {
+          "type": "object",
+          "required": ["navn", "koordinater"],
+          "properties": {
+            "navn": { "type": "string" },
+            "koordinater": {
+              "type": "object",
+              "properties": {
+                "lat": { "type": "number" },
+                "lon": { "type": "number" }
+              }
+            }
+          }
+        },
+        "avreisetider": {
+          "type": "object",
+          "properties": {
+            "fra_hjem": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+            "fra_jobb": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" }
+          }
+        },
+        "preferanser": {
+          "type": "object",
+          "properties": {
+            "laert": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "situasjon": { "type": "string" },
+                  "valgt_handling": { "type": "string" },
+                  "antall_ganger": { "type": "integer" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "avvik": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kilde", "type", "alvorlighet", "beskrivelse"],
+        "properties": {
+          "id": { "type": "string" },
+          "kilde": { "type": "string", "enum": ["SIRI-SX", "SIRI-ET", "manuell"] },
+          "type": { "type": "string" },
+          "alvorlighet": { "type": "string", "enum": ["lav", "middels", "hoy"] },
+          "beskrivelse": { "type": "string" },
+          "paavirker_linjer": { "type": "array", "items": { "type": "string" } },
+          "paavirker_stasjoner": { "type": "array", "items": { "type": "string" } },
+          "estimert_varighet_min": { "type": "integer" },
+          "oppstaat": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "reisealternativer": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "beskrivelse", "avgang", "estimert_ankomst", "steg", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "beskrivelse": { "type": "string" },
+          "avgang": { "type": "string", "format": "date-time" },
+          "estimert_ankomst": { "type": "string", "format": "date-time" },
+          "steg": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "fra", "til", "varighet_min"],
+              "properties": {
+                "type": { "type": "string", "enum": ["gange", "tog", "buss", "trikk", "tbane", "ferje"] },
+                "linje": { "type": "string" },
+                "fra": { "type": "string" },
+                "til": { "type": "string" },
+                "varighet_min": { "type": "integer" }
+              }
+            }
+          },
+          "status": { "type": "string", "enum": ["i_rute", "forsinket", "innstilt", "ukjent"] }
+        }
+      }
+    }
+  }
+}

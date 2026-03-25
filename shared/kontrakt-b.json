@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Kontrakt B: Motor -> Presentasjon",
+  "description": "Ferdig tolket anbefaling fra Spor 2 til Spor 3",
+  "type": "object",
+  "required": ["bruker_id", "type", "tidspunkt", "situasjon", "anbefaling"],
+  "properties": {
+    "bruker_id": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": ["avvik", "vaermelding"],
+      "description": "avvik = proaktivt varsel ved avvik, vaermelding = periodisk statusoppdatering"
+    },
+    "tidspunkt": { "type": "string", "format": "date-time" },
+    "situasjon": {
+      "type": "object",
+      "required": ["oppsummering", "alvorlighet"],
+      "properties": {
+        "oppsummering": {
+          "type": "string",
+          "description": "Menneskelesbar oppsummering av situasjonen, generert av KI"
+        },
+        "alvorlighet": { "type": "string", "enum": ["ingen", "lav", "middels", "hoy"] },
+        "avvik_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Referanse til avvik fra Kontrakt A"
+        }
+      }
+    },
+    "anbefaling": {
+      "type": "object",
+      "required": ["handling", "beskrivelse"],
+      "properties": {
+        "handling": {
+          "type": "string",
+          "enum": ["reis_som_normalt", "reis_tidligere", "utsett", "alternativ_rute", "ikke_reis"],
+          "description": "Den anbefalte handlingen"
+        },
+        "beskrivelse": {
+          "type": "string",
+          "description": "Menneskelesbar beskrivelse av anbefalingen"
+        },
+        "alternativ_id": {
+          "type": ["string", "null"],
+          "description": "Referanse til reisealternativ fra Kontrakt A"
+        },
+        "estimert_ankomst_hjem": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "andre_alternativer": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["handling", "beskrivelse"],
+        "properties": {
+          "handling": {
+            "type": "string",
+            "enum": ["reis_som_normalt", "reis_tidligere", "utsett", "alternativ_rute", "ikke_reis"]
+          },
+          "beskrivelse": { "type": "string" },
+          "alternativ_id": { "type": ["string", "null"] },
+          "estimert_ankomst_hjem": { "type": ["string", "null"], "format": "date-time" }
+        }
+      }
+    }
+  }
+}
