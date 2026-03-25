@@ -125,5 +125,18 @@
         "paavirket_stasjon": null
       }
     ]
+  },
+  "bildata": {
+    "reisetid_fri_flyt_min": 39.0,
+    "avstand_km": 41.9,
+    "trafikk_punkter": [
+      { "stasjon": "E18 Bangeløkka Sydgående", "volum_siste_time": 672, "volum_normalt": 580, "kapasitetsutnyttelse": 1.16 },
+      { "stasjon": "E18 Tranby X", "volum_siste_time": 510, "volum_normalt": 480, "kapasitetsutnyttelse": 1.06 },
+      { "stasjon": "E18 Drammensv v/Maritim", "volum_siste_time": 890, "volum_normalt": 750, "kapasitetsutnyttelse": 1.19 },
+      { "stasjon": "Frognerstranda (E18)", "volum_siste_time": 720, "volum_normalt": 650, "kapasitetsutnyttelse": 1.11 },
+      { "stasjon": "E18 Bangeløkka Nordgående", "volum_siste_time": 430, "volum_normalt": 410, "kapasitetsutnyttelse": 1.05 }
+    ],
+    "estimert_reisetid_min": 44,
+    "kilde": "osrm+vegvesen_trafikkdata"
   }
 }

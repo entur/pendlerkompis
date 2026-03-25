@@ -13,14 +13,17 @@ import argparse
 import asyncio
 import json
 import sys
+from datetime import datetime
 
 import httpx
 
 from data.bruker import get_bruker, get_trip_params
 from data.clients.journey_planner import query_trips, query_quay_departures
 from data.clients.realtime import query_recent_arrivals, query_invalid_et
+from data.clients.road import query_osrm_route, query_current_volume, query_historical_volume
 from data.models import KontraktAUtvidet
 from data.transform import (
+    build_bildata,
     build_kontrakt_a,
     compute_delay_statistics,
     extract_destination_quay_ids,
@@ -45,9 +48,10 @@ async def hent_pendlerdata(
     4. Identify destination quay + lines from results
     5. Query historical trips (2h before) for recent delay data
     6. Query quay departures for live cancellation data
-    7. Try invalid-ET API for actual arrivals, fall back to historical trips
-    8. Compute delay statistics
-    9. Assemble extended Kontrakt A
+    7. Query OSRM + Vegvesen Trafikkdata for car travel alternative
+    8. Try invalid-ET API for actual arrivals, fall back to historical trips
+    9. Compute delay statistics
+    10. Assemble extended Kontrakt A
     """
     bruker = get_bruker()
     params = get_trip_params(direction, override_time)
@@ -70,8 +74,9 @@ async def hent_pendlerdata(
         # Determine destination name for statistics
         dest_name = bruker["hjem"]["navn"] if direction == "fra_jobb" else bruker["jobb"]["navn"]
 
-        # Steps 2+3: Historical trips + quay departures (parallel)
-        print(f"Fetching historical trips and quay departures for {len(dest_quay_ids)} quay(s)...", file=sys.stderr)
+        # Steps 2+3+4: Historical trips + quay departures + car data (parallel)
+        print(f"Fetching historical trips, quay departures for {len(dest_quay_ids)} quay(s), and car data...", file=sys.stderr)
+        now = datetime.now().astimezone()
 
         historical_task = query_recent_arrivals(
             params["from_coords"],
@@ -87,9 +92,33 @@ async def hent_pendlerdata(
             for qid in dest_quay_ids
         ]
 
-        results = await asyncio.gather(historical_task, *quay_tasks, return_exceptions=True)
+        osrm_task = query_osrm_route(params["from_coords"], params["to_coords"], client=client)
+        volume_task = query_current_volume(now, client=client)
+
+        results = await asyncio.gather(
+            historical_task, osrm_task, volume_task,
+            *quay_tasks,
+            return_exceptions=True,
+        )
         historical_data = results[0] if not isinstance(results[0], Exception) else {"trip": {"tripPatterns": []}}
-        quay_results = [r for r in results[1:] if not isinstance(r, Exception)]
+        osrm_result = results[1] if not isinstance(results[1], Exception) else None
+        current_volumes = results[2] if not isinstance(results[2], Exception) else []
+        quay_results = [r for r in results[3:] if not isinstance(r, Exception)]
+
+        # Determine the hour of the latest available volume data and fetch
+        # historical averages for that same hour (Trafikkdata has ~3h lag)
+        data_hour = None
+        for cv in current_volumes:
+            tb = cv.get("time_bucket")
+            if tb:
+                try:
+                    data_hour = datetime.fromisoformat(tb).hour
+                except (ValueError, TypeError):
+                    pass
+                break
+        historical_avgs = await query_historical_volume(
+            now, num_weeks=4, hour_override=data_hour, client=client,
+        )
 
         # Step 4: Try invalid-ET for actual arrival data
         historical_sj_ids = extract_service_journey_ids(historical_data)
@@ -115,9 +144,15 @@ async def hent_pendlerdata(
         for qdata in quay_results:
             innstillinger.extend(extract_innstillinger({"trip": {"tripPatterns": []}}, qdata))
 
-        # Step 8: Assemble
+        # Step 9: Car travel data
+        bildata = None
+        if osrm_result:
+            print("Building car travel data...", file=sys.stderr)
+            bildata = build_bildata(osrm_result, current_volumes, historical_avgs)
+
+        # Step 10: Assemble
         return build_kontrakt_a(
-            bruker, avvik, alternativer, faktiske, statistikk, innstillinger
+            bruker, avvik, alternativer, faktiske, statistikk, innstillinger, bildata
         )
 
 
