@@ -9,3 +9,7 @@ dist/
 *.mp4
 *.mov
 *.avi
+
+# Environment
+.env
+.venv/

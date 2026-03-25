@@ -4,6 +4,11 @@ import argparse
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from data.main import hent_pendlerdata
 from motor.klassifiser import klassifiser
