@@ -1,0 +1,36 @@
+{
+  "bruker_id": "rolf-1",
+  "type": "avvik",
+  "tidspunkt": "2026-03-25T14:45:00+01:00",
+  "situasjon": {
+    "oppsummering": "Signalfeil ved Asker paavirker hjemreisen din. Toget kl 16:42 er trolig innstilt eller forsinket 20-40 min.",
+    "alvorlighet": "hoy",
+    "avvik_ids": ["sx-12345"]
+  },
+  "anbefaling": {
+    "handling": "reis_tidligere",
+    "beskrivelse": "Gaa fra jobb naa. Ta 15:02-toget fra Oslo S. Du er hjemme ca. 16:15.",
+    "alternativ_id": "alt-1",
+    "estimert_ankomst_hjem": "2026-03-25T16:15:00+01:00"
+  },
+  "andre_alternativer": [
+    {
+      "handling": "alternativ_rute",
+      "beskrivelse": "Buss 31 til Lysaker, tog videre til Drammen. Hjemme ca. 18:00.",
+      "alternativ_id": "alt-2",
+      "estimert_ankomst_hjem": "2026-03-25T18:00:00+01:00"
+    },
+    {
+      "handling": "utsett",
+      "beskrivelse": "Feilen forventes loest innen kl 16. Reis som normalt, men forvent forsinkelse. Hjemme ca. 17:50.",
+      "alternativ_id": "alt-3",
+      "estimert_ankomst_hjem": "2026-03-25T17:50:00+01:00"
+    },
+    {
+      "handling": "ikke_reis",
+      "beskrivelse": "Situasjonen er usikker. Vurder hjemmekontor resten av dagen.",
+      "alternativ_id": null,
+      "estimert_ankomst_hjem": null
+    }
+  ]
+}

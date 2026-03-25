@@ -1,0 +1,17 @@
+{
+  "bruker_id": "rolf-1",
+  "type": "vaermelding",
+  "tidspunkt": "2026-03-25T16:00:00+01:00",
+  "situasjon": {
+    "oppsummering": "Hjemreisen ser bra ut. Alt normalt paa strekningen Oslo S - Drammen.",
+    "alvorlighet": "ingen",
+    "avvik_ids": []
+  },
+  "anbefaling": {
+    "handling": "reis_som_normalt",
+    "beskrivelse": "Reis som vanlig. Toget kl 16:42 fra Oslo S gaar i rute. Hjemme ca. 17:40.",
+    "alternativ_id": null,
+    "estimert_ankomst_hjem": "2026-03-25T17:40:00+01:00"
+  },
+  "andre_alternativer": []
+}

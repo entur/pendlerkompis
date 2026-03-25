@@ -1,0 +1,28 @@
+{
+  "name": "presentasjon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@entur/alert": "0.18.8",
+    "@entur/button": "4.0.4",
+    "@entur/layout": "3.5.0",
+    "@entur/tokens": "3.22.3",
+    "@entur/typography": "2.1.5",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.0.1",
+    "vite": "8.0.2"
+  }
+}
