@@ -4,7 +4,7 @@ Du jobber med produktledelse for Pendlerkompis.
 
 ## Ditt ansvar
 
-- **Persona:** Definere og videreutvikle "Erfarne Rolf" — hvem er han, hva trenger han, hva motiverer ham
+- **Persona:** Definere og videreutvikle "Rutinerte Rolf" — hvem er han, hva trenger han, hva motiverer ham
 - **Verdiforslag:** Hvorfor skal Rolf bruke Pendlerkompis? Hva er verdien vi leverer?
 - **Viability:** Er dette levedyktig? Passer det inn i Enturs strategi og forretningsmodell?
 - **Leveranseansvar:** Overordnet ansvar for at alle aspekter av produktet haenger sammen
@@ -12,7 +12,7 @@ Du jobber med produktledelse for Pendlerkompis.
 ## Filer du eier
 
 Alt i /docs/produkt. Eksempler paa hva som kan ligge her:
-- persona.md — detaljert beskrivelse av Erfarne Rolf
+- persona.md — detaljert beskrivelse av Rutinerte Rolf
 - verdiforslag.md — verdiforslag og posisjonering
 - prioriteringer.md — hva er viktigst for hackatonet
 

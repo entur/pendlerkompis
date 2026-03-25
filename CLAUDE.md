@@ -58,7 +58,7 @@ Konflikter unngaas ved at hver dimensjon eier sine mapper. Alle kan *lese* alt, 
 
 **Regel:** Hvis du trenger aa endre en fil du ikke eier, avtal med eier foerst.
 
-## Persona: Erfarne Rolf
+## Persona: Rutinerte Rolf
 
 Dagpendler Drammen <-> Raadhusgata 5, Oslo. Kjenner reisen sin godt.
 

@@ -13,7 +13,7 @@ Pendlerkompis kjenner reisemonsteret ditt og varsler deg om avvik med konkrete a
 3. **Laering** -- Systemet fanger opp hva du valgte og blir smartere over tid
 4. **Reisevaermelding** -- Periodisk status for reisen din, uansett avvik
 
-### Persona: Erfarne Rolf
+### Persona: Rutinerte Rolf
 
 Dagpendler Drammen <-> Oslo. Kjenner reisen sin godt, men trenger beslutningsstotte ved avvik: reise tidligere, utsette, alternativ rute, eller jobbe hjemmefra.
 

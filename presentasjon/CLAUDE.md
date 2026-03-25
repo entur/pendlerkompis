@@ -1,6 +1,6 @@
 # Spor 3: Presentasjon
 
-Du jobber med frontend/UI for Pendlerkompis — det Erfarne Rolf ser og interagerer med.
+Du jobber med frontend/UI for Pendlerkompis — det Rutinerte Rolf ser og interagerer med.
 
 ## Ditt ansvar
 
