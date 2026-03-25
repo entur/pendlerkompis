@@ -40,69 +40,6 @@ Data inn --> Motor (analyse/KI) --> Presentasjon
 /shared          # Kontrakter og mock-data
 ```
 
-## Kom i gang
-
-### Krav
-
-- Python 3.12+
-- Node.js 18+ (for frontend)
-- `ANTHROPIC_API_KEY` miljoevariabel (for motor ved avvik)
-
-### Oppsett
-
-```bash
-# Installer Python-avhengigheiter (data + motor)
-npm run setup
-
-# Eller manuelt:
-python3 -m venv .venv
-.venv/bin/pip install -r data/requirements.txt -r motor/requirements.txt
-
-# Installer frontend-avhengigheiter
-npm run frontend:install
-```
-
-### Kjoer
-
-```bash
-# Hent raa reisedata (Kontrakt A)
-npm run data:jobb          # Heimreise fraa jobb
-npm run data:hjem          # Reise fraa heimen
-
-# Kjoer motor — full pipeline med anbefaling (Kontrakt B)
-export ANTHROPIC_API_KEY=<din noekkel>
-npm run motor:jobb         # Heimreise fraa jobb
-npm run motor:hjem         # Reise fraa heimen
-
-# Start frontend
-npm run frontend
-```
-
-Alle kommandoar aksepterer ekstra argument via `--`:
-
-```bash
-npm run motor -- --direction fra_jobb --time 16:30
-```
-
-### Eksempel-output (motor)
-
-```json
-{
-  "bruker_id": "rolf-1",
-  "type": "vaermelding",
-  "situasjon": {
-    "oppsummering": "Heimreisa ser bra ut. RE11 kl 16:30 er i rute.",
-    "alvorlighet": "ingen"
-  },
-  "anbefaling": {
-    "handling": "reis_som_normalt",
-    "beskrivelse": "Ta RE11 kl 16:30 som vanleg.",
-    "alternativ_id": "alt-1",
-    "estimert_ankomst_hjem": "2026-03-25T17:19:49+01:00"
-  }
-}
-```
-
 ## Team
 
 7 personer, 5 utviklere. Hackaton 2026.
