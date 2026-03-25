@@ -16,15 +16,15 @@ Tre spor i en pipeline. Spor 1 er et spesifikasjonsspor — all kode lever i Spo
 ```
 
 - **Spor 1 (Data):** Utforsker Entur API-er, spesifiserer dataformat, dokumenterer brukerprofil. Leverer Kontrakt A og API-dokumentasjon. **Skriver ikke applikasjonskode.**
-- **Spor 2 (Motor):** All backend-kode. Henter data fra Entur API-er (basert paa Spor 1 sin spesifikasjon), analyserer, bruker Claude API, genererer anbefalinger. Leverer Kontrakt B.
-- **Spor 3 (Presentasjon):** Frontend/UI. Konsumerer Kontrakt B, viser varsler og vaermelding.
+- **Spor 2 (Motor):** All backend-kode. Henter data fra Entur API-er (basert på Spor 1 sin spesifikasjon), analyserer, bruker Claude API, genererer anbefalinger. Leverer Kontrakt B.
+- **Spor 3 (Presentasjon):** Frontend/UI. Konsumerer Kontrakt B, viser varsler og værmelding.
 
 ## Mappestruktur
 
 ```
 /docs              # Tverrfaglig ledelse — kontekst og spesifikasjoner
   /produkt         #   Produktleder — persona, verdiforslag, viability
-  /design          #   Designer — brukerreiser, brukerinnsikt, interaksjonsmonster
+  /design          #   Designer — brukerreiser, brukerinnsikt, interaksjonsmønster
   /team            #   Teamlead — way of work, prosess, seremonier
 /data              # Spor 1 (teknologi) — API-dokumentasjon, dataformat-spesifikasjon
 /motor             # Spor 2 (teknologi) — all backend-kode
@@ -41,13 +41,13 @@ Enturs modell med fire ledelsesdimensjoner reflekteres i /docs:
 | Dimensjon | Ansvar | Mappe | Skriver |
 |-----------|--------|-------|---------|
 | **Produkt** | Persona, verdiforslag, viability, leveranseansvar | /docs/produkt | Produktleder |
-| **Design** | Brukerreiser, brukerinnsikt, interaksjonsmonster, DesignOps | /docs/design | Designer |
+| **Design** | Brukerreiser, brukerinnsikt, interaksjonsmønster, DesignOps | /docs/design | Designer |
 | **Team** | Way of work, prosess, seremonier, metoder | /docs/team | Teamlead |
 | **Teknologi** | Arkitektur, teknologivalg, feasibility | /data, /motor, /presentasjon, /shared | Utviklere |
 
-## Fileierskap — hvordan unngaa konflikter
+## Fileierskap — hvordan unngå konflikter
 
-Konflikter unngaas ved at hver dimensjon eier sine mapper. Alle kan *lese* alt, men kun eier *skriver*.
+Konflikter unngås ved at hver dimensjon eier sine mapper. Alle kan *lese* alt, men kun eier *skriver*.
 
 - Produktleder skriver i /docs/produkt — utviklere og designer *leser* for kontekst
 - Designer skriver i /docs/design — Spor 3 (presentasjon) *leser* for UI-retning
@@ -56,18 +56,18 @@ Konflikter unngaas ved at hver dimensjon eier sine mapper. Alle kan *lese* alt, 
 - /shared (kontrakter) endres kun etter tverrfaglig avtale
 - CLAUDE.md (rot) eies av teamlead — den felles konteksten for alle Claude Code-sesjoner
 
-**Regel:** Hvis du trenger aa endre en fil du ikke eier, avtal med eier foerst.
+**Regel:** Hvis du trenger å endre en fil du ikke eier, avtal med eier først.
 
 ## Persona: Rutinerte Rolf
 
-Dagpendler Drammen <-> Raadhusgata 5, Oslo. Kjenner reisen sin godt.
+Dagpendler Drammen <-> Rådhusgata 5, Oslo. Kjenner reisen sin godt.
 
 ## Brukerreise (fire steg)
 
 1. **Oppstart:** Rolf oppgir hjem, jobb og avreisetider
-2. **Avvik:** Notifikasjon med en tydelig anbefaling + alternativer med estimert ankomsttid
-3. **Laering:** Fange opp Rolfs valg for aa forbedre fremtidige anbefalinger
-4. **Reisevaermelding:** Periodisk status foer avgang, uansett om det er avvik eller ikke
+2. **Avvik:** Notifikasjon med én tydelig anbefaling + alternativer med estimert ankomsttid
+3. **Læring:** Fange opp Rolfs valg for å forbedre fremtidige anbefalinger
+4. **Reiseværmelding:** Periodisk status før avgang, uansett om det er avvik eller ikke
 
 ## Kontrakt A: Data -> Motor
 
@@ -80,13 +80,13 @@ Spor 1 spesifiserer dataformatet. Spor 2 implementerer hentingen.
   "bruker": {
     "id": "rolf-1",
     "hjem": { "navn": "Drammen", "koordinater": { "lat": 59.7441, "lon": 10.2045 } },
-    "jobb": { "navn": "Raadhusgata 5, Oslo", "koordinater": { "lat": 59.9118, "lon": 10.7340 } },
+    "jobb": { "navn": "Rådhusgata 5, Oslo", "koordinater": { "lat": 59.9118, "lon": 10.7340 } },
     "avreisetider": {
       "fra_hjem": "07:15",
       "fra_jobb": "16:30"
     },
     "preferanser": {
-      "laert": []
+      "lært": []
     }
   },
   "avvik": [
@@ -94,12 +94,12 @@ Spor 1 spesifiserer dataformatet. Spor 2 implementerer hentingen.
       "id": "sx-12345",
       "kilde": "SIRI-SX",
       "type": "signalfeil",
-      "alvorlighet": "hoy",
+      "alvorlighet": "høy",
       "beskrivelse": "Signalfeil ved Asker stasjon",
-      "paavirker_linjer": ["L1", "RE11"],
-      "paavirker_stasjoner": ["Asker"],
+      "påvirker_linjer": ["L1", "RE11"],
+      "påvirker_stasjoner": ["Asker"],
       "estimert_varighet_min": 60,
-      "oppstaat": "2026-03-25T14:30:00+01:00"
+      "oppstått": "2026-03-25T14:30:00+01:00"
     }
   ],
   "reisealternativer": [
@@ -109,7 +109,7 @@ Spor 1 spesifiserer dataformatet. Spor 2 implementerer hentingen.
       "avgang": "2026-03-25T15:02:00+01:00",
       "estimert_ankomst": "2026-03-25T16:15:00+01:00",
       "steg": [
-        { "type": "gange", "fra": "Raadhusgata 5", "til": "Oslo S", "varighet_min": 12 },
+        { "type": "gange", "fra": "Rådhusgata 5", "til": "Oslo S", "varighet_min": 12 },
         { "type": "tog", "linje": "RE11", "fra": "Oslo S", "til": "Drammen", "varighet_min": 50 }
       ],
       "status": "i_rute"
@@ -130,13 +130,13 @@ Spor 2 leverer ferdig tolket anbefaling til Spor 3:
   "type": "avvik",
   "tidspunkt": "2026-03-25T14:45:00+01:00",
   "situasjon": {
-    "oppsummering": "Signalfeil ved Asker paavirker hjemreisen din. Toget kl 16:42 er trolig innstilt.",
-    "alvorlighet": "hoy",
+    "oppsummering": "Signalfeil ved Asker påvirker hjemreisen din. Toget kl 16:42 er trolig innstilt.",
+    "alvorlighet": "høy",
     "avvik_ids": ["sx-12345"]
   },
   "anbefaling": {
     "handling": "reis_tidligere",
-    "beskrivelse": "Gaa fra jobb naa. Ta 15:02-toget fra Oslo S.",
+    "beskrivelse": "Gå fra jobb nå. Ta 15:02-toget fra Oslo S.",
     "alternativ_id": "alt-1",
     "estimert_ankomst_hjem": "2026-03-25T16:15:00+01:00"
   },
@@ -149,7 +149,7 @@ Spor 2 leverer ferdig tolket anbefaling til Spor 3:
     },
     {
       "handling": "utsett",
-      "beskrivelse": "Vent -- feilen forventes loest innen kl 16. Reis som normalt.",
+      "beskrivelse": "Vent — feilen forventes løst innen kl 16. Reis som normalt.",
       "alternativ_id": null,
       "estimert_ankomst_hjem": "2026-03-25T17:50:00+01:00"
     },
@@ -163,13 +163,14 @@ Spor 2 leverer ferdig tolket anbefaling til Spor 3:
 }
 ```
 
-For reisevaermelding brukes samme format men med `"type": "vaermelding"` og lavere alvorlighet.
+For reiseværmelding brukes samme format men med `"type": "værmelding"` og lavere alvorlighet.
 
 ## Regler
 
+- **Norsk tekst skal alltid bruke æ, ø og å — aldri substitusjonene aa, oe, ae.** Hvis du finner eksisterende tekst med slike substitusjoner, fiks dem.
 - Spor 1 skriver spesifikasjoner og dokumentasjon, IKKE applikasjonskode
 - All applikasjonskode lever i Spor 2 (motor) og Spor 3 (presentasjon)
-- Hvert spor jobber i sin egen mappe og paa sin egen branch
+- Hvert spor jobber i sin egen mappe og på sin egen branch
 - /shared endres kun etter avtale i teamet
 - Mock-data i /shared brukes til alle spor kan integreres
 - En notifikasjon har alltid: (1) hva som skjedde, (2) en tydelig anbefaling, (3) andre alternativer med ankomsttid
