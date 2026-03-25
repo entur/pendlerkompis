@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Media files (store locally, don't commit)
+*.wav
+*.mp4
+*.mov
+*.avi

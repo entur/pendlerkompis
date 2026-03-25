@@ -157,6 +157,29 @@
           }
         }
       }
+    },
+    "bildata": {
+      "type": "object",
+      "description": "Bil-reisetid og trafikkdata langs E18 for sammenligning med kollektivtransport.",
+      "properties": {
+        "reisetid_fri_flyt_min": { "type": "number", "description": "Fri-flyt reisetid i minutter (OSRM)" },
+        "avstand_km": { "type": "number", "description": "Kjøreavstand i kilometer" },
+        "trafikk_punkter": {
+          "type": "array",
+          "description": "Trafikkvolum ved målepunkter langs E18.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "stasjon": { "type": "string" },
+              "volum_siste_time": { "type": "integer", "description": "Kjøretøy registrert siste time" },
+              "volum_normalt": { "type": "integer", "description": "Gjennomsnittlig volum samme time/ukedag" },
+              "kapasitetsutnyttelse": { "type": "number", "description": "Ratio siste_time/normalt. >1 = travlere enn vanlig" }
+            }
+          }
+        },
+        "estimert_reisetid_min": { "type": ["number", "null"], "description": "Trafikkjustert estimat (fri-flyt * gjennomsnittlig kapasitetsutnyttelse). null hvis ingen trafikkdata." },
+        "kilde": { "type": "string", "description": "Datakilder brukt, f.eks. osrm+vegvesen_trafikkdata" }
+      }
     }
   }
 }

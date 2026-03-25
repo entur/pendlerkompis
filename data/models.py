@@ -99,8 +99,24 @@ class Sanntidsdata(TypedDict):
     innstillinger: list[Innstilling]
 
 
+class TrafikkPunkt(TypedDict):
+    stasjon: str
+    volum_siste_time: int  # vehicles counted last hour
+    volum_normalt: int  # typical volume same hour/weekday
+    kapasitetsutnyttelse: float  # ratio: siste_time / normalt (>1 = busier than usual)
+
+
+class Bildata(TypedDict, total=False):
+    reisetid_fri_flyt_min: float  # OSRM free-flow travel time
+    avstand_km: float  # OSRM distance
+    trafikk_punkter: list[TrafikkPunkt]  # Vegvesen volume readings along route
+    estimert_reisetid_min: float | None  # adjusted estimate (free-flow * congestion factor)
+    kilde: str  # "osrm+vegvesen_trafikkdata"
+
+
 class KontraktAUtvidet(TypedDict):
     bruker: Bruker
     avvik: list[Avvik]
     reisealternativer: list[Reisealternativ]
     sanntidsdata: Sanntidsdata
+    bildata: Bildata

@@ -55,6 +55,44 @@ POST https://api.entur.io/realtime/invalid-et/graphql
 
 ---
 
+### 3. OSRM — Fri-flyt reisetid for bil
+
+**Formål:** Hente baseline kjørerute og reisetid uten trafikk.
+
+**Endepunkt:**
+```
+GET http://router.project-osrm.org/route/v1/driving/{lon1},{lat1};{lon2},{lat2}?overview=false
+```
+
+**Data vi henter:**
+- `distance` — kjøreavstand i meter
+- `duration` — fri-flyt reisetid i sekunder
+
+**Autentisering:** Ingen. Offentlig demo-server.
+
+---
+
+### 4. Vegvesen Trafikkdata — Trafikkvolum som kø-indikator
+
+**Formål:** Hente sanntids trafikkvolum fra tellepunkter langs E18 for å estimere kø-nivå.
+
+**Endepunkt:**
+```
+POST https://trafikkdata-api.atlas.vegvesen.no/ (GraphQL)
+```
+
+**Data vi henter:**
+- Kjøretøyvolum per time ved 5 representative E18-stasjoner (Bangeløkka, Tranby, Maritim, Frognerstranda, Bangeløkka nord)
+- Historisk gjennomsnitt for samme time/ukedag (siste 4 uker)
+
+**Beregning:** `kapasitetsutnyttelse = volum_nå / volum_normalt`. Brukes til å justere fri-flyt reisetiden: `estimert_reisetid = fri_flyt * snitt(kapasitetsutnyttelse)`, maks 2.5x.
+
+**Autentisering:** Ingen. Åpent GraphQL-API.
+
+**Begrensninger:** Gir volum, ikke hastighet. Trafikkvolum er en indirekte kø-indikator — høyt volum betyr ikke nødvendigvis kø, men korrelerer godt i rushtid.
+
+---
+
 ## API-er vi IKKE bruker (og hvorfor)
 
 | API | Grunn til å utelate |
@@ -78,31 +116,31 @@ POST https://api.entur.io/realtime/invalid-et/graphql
 │  3. quay(destinasjon)→ Live kanselleringer           │
 └──────────────────┬───────────────────────────────────┘
                    │
-                   ▼
-┌──────────────────────────────────────────────────────┐
-│  invalid-ET (valgfritt)                              │
-│  → Faktiske ankomsttider for historiske avganger     │
-│  → Fallback: beregn fra historiske trip-responser    │
-└──────────────────┬───────────────────────────────────┘
-                   │
-                   ▼
+    ┌──────────────┼──────────────────┐
+    ▼              ▼                  ▼
+┌────────────┐ ┌───────────────┐ ┌──────────────────┐
+│ invalid-ET │ │ OSRM (bil)    │ │ Vegvesen         │
+│ (valgfri)  │ │ → fri-flyt    │ │ Trafikkdata      │
+│ → faktiske │ │   reisetid    │ │ → volum nå       │
+│   ankomst  │ │   + avstand   │ │ → volum historisk │
+└──────┬─────┘ └──────┬────────┘ └────────┬─────────┘
+       │              │                    │
+       ▼              ▼                    ▼
 ┌──────────────────────────────────────────────────────┐
 │  Transform + beregning                               │
 │                                                      │
 │  → avvik[] fra situations (SIRI SX)                  │
 │  → reisealternativer[] med status og steg            │
-│  → sanntidsdata:                                     │
-│      faktiske_ankomster (siste 2 timer)              │
-│      forsinkelsesstatistikk (median/p90 per linje)   │
-│      innstillinger (kanselleringer)                  │
+│  → sanntidsdata (forsinkelser, kanselleringer)        │
+│  → bildata (fri-flyt + trafikkjustert reisetid)      │
 └──────────────────┬───────────────────────────────────┘
                    │
                    ▼
-          Bygg Kontrakt A (utvidet)
-          (bruker + avvik + alternativer + sanntidsdata)
+      Bygg Kontrakt A (utvidet)
+      (bruker + avvik + alternativer + sanntidsdata + bildata)
                    │
                    ▼
-          Motor analyserer → Kontrakt B
+      Motor analyserer → Kontrakt B
 ```
 
 ## Kontrakt A — utvidet med sanntidsdata
@@ -144,7 +182,28 @@ I tillegg til standard Kontrakt A (`bruker`, `avvik`, `reisealternativer`) lever
 }
 ```
 
-Denne seksjonen er additiv — den bryter ikke Kontrakt A for konsumenter som ignorerer den.
+### bildata — bil-alternativ
+
+```json
+{
+  "bildata": {
+    "reisetid_fri_flyt_min": 39.0,
+    "avstand_km": 41.9,
+    "trafikk_punkter": [
+      {
+        "stasjon": "E18 Bangeløkka Sydgående",
+        "volum_siste_time": 672,
+        "volum_normalt": 580,
+        "kapasitetsutnyttelse": 1.16
+      }
+    ],
+    "estimert_reisetid_min": 45,
+    "kilde": "osrm+vegvesen_trafikkdata"
+  }
+}
+```
+
+Begge seksjonene er additive — de bryter ikke Kontrakt A for konsumenter som ignorerer dem.
 
 ## Bruk (CLI)
 
@@ -156,10 +215,8 @@ PYTHONPATH=. .venv/bin/python -m data.main --direction fra_hjem --time 07:15
 
 ## Autentisering
 
-Alle Entur API-er er åpne under NLOD-lisens. Ingen API-nøkkel kreves, men alle kall **må** inkludere headeren:
+**Entur API-er:** Åpne under NLOD-lisens. Ingen API-nøkkel, men alle kall **må** inkludere headeren `ET-Client-Name: entur-pendlerkompis`.
 
-```
-ET-Client-Name: entur-pendlerkompis
-```
+**OSRM:** Offentlig demo-server, ingen autentisering.
 
-Manglende header kan føre til rate-limiting eller blokkering.
+**Vegvesen Trafikkdata:** Åpent GraphQL-API, ingen autentisering.

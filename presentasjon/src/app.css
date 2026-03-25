@@ -1,0 +1,27 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'National 2', system-ui, sans-serif;
+  background-color: var(--colors-brand-white, #fff);
+  color: var(--colors-greys-grey, #292929);
+}
+
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--colors-greys-grey10, #eee);
+  margin-bottom: 1.5rem;
+}

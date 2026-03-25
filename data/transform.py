@@ -7,6 +7,7 @@ from datetime import datetime
 
 from data.models import (
     Avvik,
+    Bildata,
     Bruker,
     FaktiskAnkomst,
     ForsinkelsesStatistikk,
@@ -15,6 +16,7 @@ from data.models import (
     Reisealternativ,
     Sanntidsdata,
     Steg,
+    TrafikkPunkt,
 )
 
 # --- Mapping tables ---
@@ -337,6 +339,51 @@ def extract_innstillinger(
     return innstillinger
 
 
+# --- Car traffic data ---
+
+def build_bildata(
+    osrm_result: dict,
+    current_volumes: list[dict],
+    historical_avgs: dict[str, float],
+) -> Bildata:
+    """Build car travel data from OSRM route + Vegvesen traffic volumes.
+
+    Computes a congestion-adjusted travel time estimate by comparing
+    current traffic volume to historical averages at E18 stations.
+    """
+    trafikk_punkter: list[TrafikkPunkt] = []
+    congestion_ratios: list[float] = []
+
+    for cv in current_volumes:
+        normal = historical_avgs.get(cv["station_id"], 0)
+        ratio = cv["volume"] / normal if normal > 0 else 1.0
+        trafikk_punkter.append({
+            "stasjon": cv["station_name"],
+            "volum_siste_time": cv["volume"],
+            "volum_normalt": int(normal),
+            "kapasitetsutnyttelse": round(ratio, 2),
+        })
+        if cv["volume"] > 0 and normal > 0:
+            congestion_ratios.append(ratio)
+
+    free_flow = osrm_result["reisetid_fri_flyt_min"]
+    if congestion_ratios:
+        avg_congestion = sum(congestion_ratios) / len(congestion_ratios)
+        # Cap at 2.5x free-flow to avoid unrealistic estimates
+        factor = min(avg_congestion, 2.5)
+        estimert = round(free_flow * factor, 0)
+    else:
+        estimert = None
+
+    return {
+        "reisetid_fri_flyt_min": free_flow,
+        "avstand_km": osrm_result["avstand_km"],
+        "trafikk_punkter": trafikk_punkter,
+        "estimert_reisetid_min": estimert,
+        "kilde": "osrm+vegvesen_trafikkdata",
+    }
+
+
 # --- Assemble final output ---
 
 def build_kontrakt_a(
@@ -346,8 +393,9 @@ def build_kontrakt_a(
     faktiske_ankomster: list[FaktiskAnkomst],
     forsinkelsesstatistikk: list[ForsinkelsesStatistikk],
     innstillinger: list[Innstilling],
+    bildata: Bildata | None = None,
 ) -> KontraktAUtvidet:
-    return {
+    result: KontraktAUtvidet = {
         "bruker": bruker,
         "avvik": avvik,
         "reisealternativer": reisealternativer,
@@ -356,4 +404,6 @@ def build_kontrakt_a(
             "forsinkelsesstatistikk": forsinkelsesstatistikk,
             "innstillinger": innstillinger,
         },
+        "bildata": bildata or {},
     }
+    return result

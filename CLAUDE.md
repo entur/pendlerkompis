@@ -167,6 +167,7 @@ For reiseværmelding brukes samme format men med `"type": "værmelding"` og lave
 
 ## Regler
 
+- **All kode, kommentarer og filnavn skal alltid være på engelsk.** Norsk brukes kun i brukervendt tekst (UI-labels, beskrivelser) og i dokumentasjon.
 - **Norsk tekst skal alltid bruke æ, ø og å — aldri substitusjonene aa, oe, ae.** Hvis du finner eksisterende tekst med slike substitusjoner, fiks dem.
 - Spor 1 skriver spesifikasjoner og dokumentasjon, IKKE applikasjonskode
 - All applikasjonskode lever i Spor 2 (motor) og Spor 3 (presentasjon)
